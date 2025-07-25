@@ -1,0 +1,192 @@
+:root {
+    --border: 2px;
+    --depth: 0;
+    --noise: 0;
+    transition-property: color, background-color, outline-color, gap, outline-width, box-shadow, outline-offset, outline-color, transform;
+    /* transition-timing-function: cubic-bezier(0.5, 1, 0.89, 1); */
+    transition-duration: 0.15s;
+
+    --color-shadow: #010101;
+    --shadow-radius: 6px;
+    --shadow-offset: 0px 0px;
+
+    --color-background-1: var(--color-base-200);
+    --color-border-1: var(--color-base-300);
+    --border-1: 16px;
+
+    --color-background-2: var(--color-base-100);
+    --color-border-2: var(--color-base-200);
+    --border-2: 12px;
+
+    --color-background-3: var(--color-base-000);
+    --color-border-3: var(--color-base-100);
+    --border-2: 12px;
+
+    --tint-100: 15%;
+    --tint-200: 50%;
+    --tint-300: 75%;
+
+    --tinted-pri-100: color-mix(in srgb, var(--color-primary) var(--tint-100), #FFF);
+    --tinted-pri-200: color-mix(in srgb, var(--color-primary) 10%, #000);
+
+
+    --tinted-sec-100: color-mix(in srgb, var(--color-secondary) var(--tint-100), #FFF0);
+    --tinted-sec-200: color-mix(in srgb, var(--color-secondary) var(--tint-200), #FFF0);
+    --tinted-sec-100o: color-mix(in srgb, var(--color-secondary) 12%, #000000);
+    --tinted-sec-200o: color-mix(in srgb, var(--color-secondary) 15%, #000000);
+    --tinted-sec-300o: color-mix(in srgb, var(--color-secondary) 17%, #000000);
+    --bd-filter: blur(5px) contrast(200%);
+    --border-100: 2px solid var(--tinted-sec-100);
+    --bg-100: linear-gradient(105deg, 
+                color-mix(in oklch, var(--color-primary) 20%, #0000), 
+                color-mix(in oklch, var(--color-primary) 20%, #0000), 
+                color-mix(in oklch, var(--color-primary) 8%, #0000), 
+                color-mix(in oklch, var(--color-secondary) 8%, #0000),
+                color-mix(in oklch, var(--color-secondary) 20%, #0000));
+    --bg-200: linear-gradient(105deg, 
+                color-mix(in oklch, var(--color-primary) 30%, #0000), 
+                color-mix(in oklch, var(--color-primary) 30%, #0000), 
+                color-mix(in oklch, var(--color-primary) 10%, #0000), 
+                color-mix(in oklch, var(--color-secondary) 10%, #0000),
+                color-mix(in oklch, var(--color-secondary) 30%, #0000));
+    
+    --box-shadow: 0 0 6px;
+}
+input::-ms-reveal,
+input::-ms-clear {
+display: none;
+}
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+    transition: background-color 0s 600000s, color 0s 600000s !important;
+}
+
+::view-transition-group(root) {
+  animation-duration: 0.15s;
+}
+
+::view-transition-group(.vertical_navbar) {
+  animation-duration: 0s;
+}
+
+.card-100 {
+    padding: 0.75rem;
+    border-radius: var(--border-1);
+    border: 2px solid #AAAAAA0F;
+    background-origin: border-box;
+    background-color: var(--tinted-sec-100o);
+    box-shadow: 0 0 12px #000;
+}
+
+.card-200 {
+    padding: 0.75rem;
+    border-radius: var(--border-1);
+    border: 2px solid #AAAAAA0C;
+    background-origin: border-box;
+    background-color: color-mix(in srgb, var(--color-secondary) 15%, #000000);
+    box-shadow: 0 0 12px #000;
+}
+
+.card-300 {
+    padding: 0.75rem;
+    border-radius: var(--border-1);
+    border: 2px solid #AAA1;
+    background-origin: border-box;
+    background-color: color-mix(in srgb, var(--color-secondary) 17%, #000000);
+    box-shadow: 0 0 12px #000;
+}
+
+
+html {
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+[data-neo] .btn-border {
+    --col: var(--btn-color);
+    --col-bg: var(--btn-bg);
+    margin:  var(--border) var(--border);
+    height: calc(var(--size) - var(--border) * 2);
+    border: none;
+    border-radius: var(--radius-field);
+    outline-color: var(--col);
+    outline-style: solid;
+    outline-width: var(--border); 
+    background: 0;
+    color: var(--col);
+    cursor: pointer;
+    outline-offset: 0px;
+    transform: scale(1);
+    transition-property: color, background-color, outline-color, outline-width, box-shadow, outline-offset, outline-color, transform;
+    transition-duration: 0.15s;
+    &:is(:disabled, [disabled], .btn-disabled) {
+        color: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 30%);
+        outline-color: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 30%);
+    }
+}
+
+[data-neo] .btn-border:hover, .btn-border:focus-visible {
+    outline-offset: var(--border);
+    outline-color: var(--col);
+    background-color: var(--col);
+    transform: scale(1);    
+    color: var(--btn-fg);
+}
+
+.btn {
+    translate: unset !important;
+}
+
+[data-neo] .btn-border:active {
+    outline-color: var(--col-bg);
+    color: var(--col-bg);
+    transform: scale(0.97);
+    outline-offset: -2px;
+    background: 0;
+    /* background-color: color-mix(in srgb, var(--col-bg), #000, 10%); */
+}
+
+
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    text-wrap: nowrap;
+}
+
+.undraggable {
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.swap-flip-vertical {
+    transform-style: preserve-3d;
+    perspective: 20rem /* 320px */;
+    .swap-on, .swap-indeterminate, input:indeterminate ~ .swap-on {
+        transform: rotateX(180deg);
+        backface-visibility: hidden;
+    }
+    input:is(:checked, :indeterminate) ~ .swap-on, &.swap-active .swap-on {
+        transform: rotateX(0deg);
+    }
+    input:is(:checked, :indeterminate) ~ .swap-off, &.swap-active .swap-off {
+        transform: rotateX(-180deg);
+        backface-visibility: hidden;
+        opacity: 100%;
+    }
+}
