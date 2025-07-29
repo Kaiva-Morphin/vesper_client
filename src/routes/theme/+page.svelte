@@ -17,7 +17,7 @@
 
 </script>
 
-<main class="card-100 w-full h-full flex flex-wrap">
+<div class="card-100 flex-grow h-full flex flex-col">
   <div>
     <button class="btn btn-error btn-border" onclick={override}>OVERRIDE THEME</button>
   </div>
@@ -42,7 +42,7 @@
   <button class="btn btn-warning btn-border">bw button</button>
   <button class="btn btn-warning btn-disabled">disabled w button</button>
   <button class="btn btn-border btn-warning btn-disabled">disabled bw button</button>
-</main>
+</div>
 
 <style>
 

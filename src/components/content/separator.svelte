@@ -5,7 +5,7 @@
         gradient?: boolean,
     } = $props();
 </script>
-<div class={`w-full ${gradient ? "gradient_horizontal_separator" : "horizontal_separator"}`}></div>
+<div class={`w-full h-[32px] ${gradient ? "gradient_horizontal_separator" : "horizontal_separator"}`}></div>
 
 <style>
 :global {

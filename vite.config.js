@@ -17,11 +17,20 @@ export default defineConfig(async () => ({
     port: 1420,
     strictPort: true,
     host: host || false,
+    proxy: {
+			'/api': {
+				target: 'https://localhost',
+        secure: false,
+				changeOrigin: true,
+				// rewrite: (path) => path.replace(/^/api/, '')
+			}
+		},
     hmr: host
       ? {
           protocol: "ws",
           host,
           port: 1421,
+          
         }
       : undefined,
     watch: {

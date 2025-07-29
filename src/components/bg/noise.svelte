@@ -136,14 +136,5 @@ void main() {
     >
         <div class="fallback">WebGL not supported in this environment.</div>
     </WebGlShader>
-    <div class="absolute top-0 h-full w-full glass"></div>
+    <!-- <div class="absolute top-0 h-full w-full glass"></div> -->
 </div>
-
-<style>
-.glass {
-    background: rgba(0, 0, 0, 0.0);
-    backdrop-filter: blur(4px); 
-    background-color: var(--color-primary);
-    mix-blend-mode: overlay;
-}
-</style>

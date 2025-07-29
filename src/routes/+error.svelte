@@ -2,4 +2,4 @@
   import { page } from "$app/stores";
 </script>
 
-<h1>HEHE</h1>
+<h1>Error!</h1>

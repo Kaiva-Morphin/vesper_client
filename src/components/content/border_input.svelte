@@ -1,27 +1,30 @@
 <script lang="ts">
   import Icon from "@iconify/svelte";
     let {
+        value = $bindable(),
+        id = null,
         placeholder,
         icon,
-        extraClass = "",
+        class: extra_class = "",
         password = false,
-    } : {
-        icon: string,
-        placeholder: string,
-        extraClass?: string,
-        password?: boolean
-    } = $props(); 
+        autocomplete = null,
+        style: style_prop = "",
+        ok_state = null,
+        err_hint = null,
+        onsubmit = null,
+    } = $props();
     let hidden = $state(password ? true : false);
-
 </script>
 
-<label class={`flex-inline flex custom_input ${extraClass}`}>
+<label data-tip={err_hint??""}
+id={id}
+class={`flex-inline flex custom_input ${extra_class} ${ok_state == false && err_hint ? "tooltip tooltip-error" : ""}`} style={ok_state == null ? "" : ok_state ? "--col: var(--color-success); --col-active: var(--col)" : "--col: var(--color-error); --col-active: var(--col)"}>
     {#if icon != null}
         <Icon icon={icon} height=22px class="ml-2 min-w-[22px] max-w-full h-full"></Icon>
     {/if}
-    <input class="inner_input unselectable flex-grow mx-2 " data-password type={hidden ? "password" : "text"} id={placeholder} placeholder={placeholder}/>
+    <input  bind:value={value} class="inner_input unselectable flex-grow mx-2" data-password type={hidden ? "password" : "text"} autocomplete={autocomplete} placeholder={placeholder}/>
     {#if password}
-        <label class="swap swap-flip-vertical ">
+        <label class="swap swap-flip-vertical cursor-pointer">
             <input type="checkbox" tabindex='-1' onclick={() => {hidden = !hidden}}/>
             <Icon class="swap-on h-full mr-2" height=22px icon="mingcute:eye-2-fill"></Icon>
             <Icon class="swap-off h-full mr-2" height=22px icon="mingcute:eye-close-fill"></Icon>
@@ -30,8 +33,12 @@
 </label>
 
 <style>
-input[data-password]:not(:placeholder-shown) {
+input:not(:placeholder-shown) {
   transition: letter-spacing 0.3s, font-family 0.3s;
+}
+
+:focus {
+    outline: 0;
 }
 
 input[type="password"]:not(:placeholder-shown) {
@@ -42,12 +49,6 @@ input[type="password"]:not(:placeholder-shown) {
 
 .inner_input {
     width: 0;
-}
-
-.inner_input:focus {
-  border: none;
-  outline: 0;
-  background-color: 0;
 }
 
 .custom_input {
@@ -72,4 +73,5 @@ input[type="password"]:not(:placeholder-shown) {
 .custom_input:has(.inner_input:focus) {
     border-color: var(--col-active);
 }
+
 </style>

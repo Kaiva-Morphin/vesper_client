@@ -28,7 +28,9 @@
 
     --tinted-pri-100: color-mix(in srgb, var(--color-primary) var(--tint-100), #FFF);
     --tinted-pri-200: color-mix(in srgb, var(--color-primary) 10%, #000);
-
+    
+    --tinted-acc-100: color-mix(in srgb, var(--color-accent) var(--tint-100), #FFF);
+    --tinted-acc-200: color-mix(in srgb, var(--color-accent) var(--tint-200), #FFF);
 
     --tinted-sec-100: color-mix(in srgb, var(--color-secondary) var(--tint-100), #FFF0);
     --tinted-sec-200: color-mix(in srgb, var(--color-secondary) var(--tint-200), #FFF0);
@@ -37,15 +39,22 @@
     --tinted-sec-300o: color-mix(in srgb, var(--color-secondary) 17%, #000000);
     --bd-filter: blur(5px) contrast(200%);
     --border-100: 2px solid var(--tinted-sec-100);
+
+    --bg-straight: linear-gradient(90deg, 
+                color-mix(in oklch, var(--color-primary) 6%, #0000), 
+                color-mix(in oklch, var(--color-primary) 4%, #0000), 
+                color-mix(in oklch, var(--color-secondary) 4%, #0000), 
+                color-mix(in oklch, var(--color-secondary) 4%, #0000),
+                color-mix(in oklch, var(--color-secondary) 6%, #0000));
     --bg-100: linear-gradient(105deg, 
                 color-mix(in oklch, var(--color-primary) 20%, #0000), 
-                color-mix(in oklch, var(--color-primary) 20%, #0000), 
+                color-mix(in oklch, var(--color-primary) 8%, #0000), 
                 color-mix(in oklch, var(--color-primary) 8%, #0000), 
                 color-mix(in oklch, var(--color-secondary) 8%, #0000),
                 color-mix(in oklch, var(--color-secondary) 20%, #0000));
     --bg-200: linear-gradient(105deg, 
                 color-mix(in oklch, var(--color-primary) 30%, #0000), 
-                color-mix(in oklch, var(--color-primary) 30%, #0000), 
+                color-mix(in oklch, var(--color-primary) 10%, #0000), 
                 color-mix(in oklch, var(--color-primary) 10%, #0000), 
                 color-mix(in oklch, var(--color-secondary) 10%, #0000),
                 color-mix(in oklch, var(--color-secondary) 30%, #0000));
@@ -165,6 +174,9 @@ html {
     -ms-user-select: none;
 }
 
+/* :focus {
+     outline: 0;
+} */
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
@@ -190,3 +202,15 @@ html {
         opacity: 100%;
     }
 }
+
+@keyframes jiggle {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+}
+
+.shake {
+    animation: jiggle 0.3s ease forwards;
+}
+
