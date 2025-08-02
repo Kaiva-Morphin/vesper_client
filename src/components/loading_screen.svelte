@@ -1,6 +1,14 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import { clearRefresh, refresh } from "$lib/api/auth.svelte";
+    import { goto } from "$app/navigation";
+    import { page } from '$app/state';
+    let oauth_err = page.url.searchParams.get("oauth_err");
+
+    if (oauth_err) {
+        newToast(`Oauth: ${oauth_err}`, "btn-error");
+    }
+
+    import { clearRefresh, refresh } from "$lib/api/auth.svelte";
+    import { newToast } from "$lib/toast.svelte";
     import Icon from "@iconify/svelte";
     import { fade, fly, slide } from "svelte/transition";
     let loading = $state(true);

@@ -22,8 +22,14 @@ export default defineConfig(async () => ({
 				target: 'https://localhost',
         secure: false,
 				changeOrigin: true,
-				// rewrite: (path) => path.replace(/^/api/, '')
-			}
+			},
+      '/assets': {
+        target: 'http://localhost:5000',
+        secure: false,
+				changeOrigin: true,
+        // @ts-ignore
+        rewrite: (path) => path.replace("/assets", '')
+      }
 		},
     hmr: host
       ? {

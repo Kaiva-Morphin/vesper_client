@@ -21,7 +21,7 @@ $effect(() => {
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <a in:fade={{duration: 100}} out:fade={{duration: 300}} tabindex="-1" class="fixed top-0 w-screen h-screen bg flex justify-center items-center p-y-12 p-x-2 z-100" onclick={on_deny}>
-    <button in:fly={{ y: 100, duration: 250, easing: easeOutQuint }} out:scale={{duration: 300, easing: easeOutQuint, start: 0.5}} tabindex="-1" class="card-100 w-fit h-fit max-w-full max-h-full flex flex-col flex-wrap overflow-y-scroll no-scrollbar z-110 gap-2" onclick={(e)=>{e.stopPropagation()}}>
+    <button in:fly={{ y: 100, duration: 250, easing: easeOutQuint }} out:scale={{duration: 300, easing: easeOutQuint, start: 0.5}} tabindex="-1" class="card-100 card-base card-pad card-100-border w-fit h-fit max-w-full max-h-full flex flex-col flex-wrap overflow-y-scroll no-scrollbar z-110 gap-2" onclick={(e)=>{e.stopPropagation()}}>
         <slot/>
     </button>
 </a>

@@ -5,7 +5,7 @@ import { DEVICE_FINGERPRINT } from "./fingerprint.svelte";
 
 export async function requestRegisterCode(turnstile: string, email: string) : Promise<boolean> {
     try {
-        const res = await fetch(`${PUBLIC_API_BASE}/auth/account/request_register_code`, {
+        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/account/request_register_code`, {
             headers: {
                 "Content-Type": "application/json"
             },
@@ -40,7 +40,7 @@ export function determineRegisterError(error: string) :
 
 export async function register(turnstile: string, uid: string, password: string, nickname: string, email: string, email_code: string, ) : Promise<{access_token: string, exp: number} | string> {
     try {
-        const res = await fetch(`${PUBLIC_API_BASE}/auth/account`, {
+        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/account`, {
             headers: {
                 "Content-Type": "application/json"
             },
@@ -65,9 +65,34 @@ export async function register(turnstile: string, uid: string, password: string,
     }
 }
 
+export async function oauth_register(turnstile: string, temp_token: string, uid: string, password: string ) : Promise<{access_token: string, exp: number} | string> {
+    try {
+        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/oauth/account`, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            method: "POST",
+            body: JSON.stringify({
+                "uid": uid,
+                "password": password,
+                "fingerprint": DEVICE_FINGERPRINT, // TODO!
+                "tos_accepted": true,
+                "turnstile_token": turnstile,
+                "temp_token": temp_token
+            })
+        });
+        
+        if (!res.ok) return await res.text();
+        let j = await res.json();
+        return j
+    } catch (e: any) {
+        return "Something went wrong!";
+    }
+}
+
 export async function login(turnstile: string, email: string, password: string ) : Promise<{access_token: string, exp: number} | string> {
     try {
-        const res = await fetch(`${PUBLIC_API_BASE}/auth/session`, {
+        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/session`, {
             headers: {
                 "Content-Type": "application/json"
             },
@@ -89,9 +114,30 @@ export async function login(turnstile: string, email: string, password: string )
 }
 
 
+export async function oauth_login(token: string ) : Promise<{access_token: string, exp: number} | string> {
+    try {
+        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/oauth/session`, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            method: "POST",
+            body: JSON.stringify({
+                "token": token,
+            })
+        });
+        
+        if (!res.ok) return await res.text();
+        let j = await res.json();
+        return j
+    } catch (e: any) {
+        return "Something went wrong!";
+    }
+}
+
+
 export async function checkUid(uid: string): Promise<boolean | null> {
     try {
-        const res = await fetch(`${PUBLIC_API_BASE}/auth/account/uid_check?user_uid=${uid}`);
+        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/account/uid_check?user_uid=${uid}`);
         if (!res.ok) return null;
         let j = await res.json();
         return j;
@@ -101,7 +147,7 @@ export async function checkUid(uid: string): Promise<boolean | null> {
 
 export async function refresh() : Promise<boolean> {
     try {
-        const res = await fetch(`${PUBLIC_API_BASE}/auth/tokens/refresh`, {
+        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/tokens/refresh`, {
             headers: {
                 "Content-Type": "application/json"
             },

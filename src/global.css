@@ -2,9 +2,10 @@
     --border: 2px;
     --depth: 0;
     --noise: 0;
-    transition-property: color, background-color, outline-color, gap, outline-width, box-shadow, outline-offset, outline-color, transform;
+    transition-property: color, background-color, outline-color, gap, outline-width, box-shadow, outline-offset, outline-color, transform, border-radius, border-color;
     /* transition-timing-function: cubic-bezier(0.5, 1, 0.89, 1); */
-    transition-duration: 0.15s;
+    /* transition-duration: 0.15s; */
+    transition-duration: 0.4s;
 
     --color-shadow: #010101;
     --shadow-radius: 6px;
@@ -43,24 +44,44 @@
     --bg-straight: linear-gradient(90deg, 
                 color-mix(in oklch, var(--color-primary) 6%, #0000), 
                 color-mix(in oklch, var(--color-primary) 4%, #0000), 
-                color-mix(in oklch, var(--color-secondary) 4%, #0000), 
+                /* color-mix(in oklch, var(--color-secondary) 4%, #0000),  */
                 color-mix(in oklch, var(--color-secondary) 4%, #0000),
                 color-mix(in oklch, var(--color-secondary) 6%, #0000));
     --bg-100: linear-gradient(105deg, 
                 color-mix(in oklch, var(--color-primary) 20%, #0000), 
                 color-mix(in oklch, var(--color-primary) 8%, #0000), 
-                color-mix(in oklch, var(--color-primary) 8%, #0000), 
+                /* color-mix(in oklch, var(--color-primary) 8%, #0000),  */
                 color-mix(in oklch, var(--color-secondary) 8%, #0000),
                 color-mix(in oklch, var(--color-secondary) 20%, #0000));
     --bg-200: linear-gradient(105deg, 
                 color-mix(in oklch, var(--color-primary) 30%, #0000), 
                 color-mix(in oklch, var(--color-primary) 10%, #0000), 
-                color-mix(in oklch, var(--color-primary) 10%, #0000), 
+                /* color-mix(in oklch, var(--color-primary) 10%, #0000),  */
                 color-mix(in oklch, var(--color-secondary) 10%, #0000),
                 color-mix(in oklch, var(--color-secondary) 30%, #0000));
     
     --box-shadow: 0 0 6px;
+
+    --skeleton-bg: linear-gradient(
+        110deg,
+        transparent 0%,
+        transparent 40%,
+        color-mix(in srgb, var(--color-primary) 6%, #0000) 45%,
+        color-mix(in srgb, var(--color-primary) 10%, #0000) 48%,
+        color-mix(in srgb, var(--color-secondary) 10%, #0000) 52%,
+        color-mix(in srgb, var(--color-secondary) 6%, #0000) 55%,
+        transparent 60%,
+        transparent 100%
+    );
+
+    --vh: calc(100vh - var(--titlebar-size));
 }
+
+.vh {
+    height: var(--vh);
+}
+
+
 input::-ms-reveal,
 input::-ms-clear {
 display: none;
@@ -78,29 +99,48 @@ input:-webkit-autofill:focus {
   animation-duration: 0s;
 }
 
-.card-100 {
-    padding: 0.75rem;
-    border-radius: var(--border-1);
+.card-base {
     border: 2px solid #AAAAAA0F;
     background-origin: border-box;
-    background-color: var(--tinted-sec-100o);
+    /* box-shadow: 0 0 12px #000; */
+}
+
+.card-pad {
+    padding: 0.75rem;
+}
+
+.card-100-border {
+    border-radius: var(--border-1);
+}
+
+.card-100-shadow {
     box-shadow: 0 0 12px #000;
 }
 
+.card-100 {
+    border: 2px solid #AAAAAA0F;
+    background-color: var(--tinted-sec-100o);
+    /* box-shadow: 0 0 12px #000; */
+}
+
 .card-200 {
-    padding: 0.75rem;
-    border-radius: var(--border-1);
     border: 2px solid #AAAAAA0C;
-    background-origin: border-box;
     background-color: color-mix(in srgb, var(--color-secondary) 15%, #000000);
+}
+
+.card-200-shadow {
     box-shadow: 0 0 12px #000;
 }
+
+.card-200-border {
+    border-radius: var(--border-2);
+}
+
 
 .card-300 {
     padding: 0.75rem;
     border-radius: var(--border-1);
     border: 2px solid #AAA1;
-    background-origin: border-box;
     background-color: color-mix(in srgb, var(--color-secondary) 17%, #000000);
     box-shadow: 0 0 12px #000;
 }
@@ -214,3 +254,136 @@ html {
     animation: jiggle 0.3s ease forwards;
 }
 
+.my-skeleton {
+    border-radius: var(--radius-box);
+    background-color: #0000;
+    @media (prefers-reduced-motion: reduce) {
+        transition-duration: 15s;
+    }
+    will-change: background-position;
+    animation: skeleton 1.8s ease-in-out infinite;
+    background: var(--skeleton-bg);
+    background-size: 200% auto;
+    background-repeat: no-repeat;
+    background-position-x: -50%;
+}
+
+
+@property --angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 90deg;
+}
+@property --off {
+    syntax: "<length-percentage>";
+    inherits: false;
+    initial-value: -100%;
+}
+
+
+.brand {
+    --angle: 105deg;
+    --off : 0%;
+    position: relative;
+    border: 0.5rem solid transparent;
+    background-origin: padding-box;
+    mask-origin: padding-box;
+    width: 100%;
+    padding-bottom: calc(100% * (15 / 43));
+}
+
+.brand::after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    image-rendering: pixelated;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image:
+        linear-gradient(var(--angle) in lab, 
+        var(--color-primary) calc(var(--off) + 0%),
+        var(--color-secondary) calc(var(--off) + 50%),
+        var(--color-primary) calc(var(--off) + 100%),
+        var(--color-secondary) calc(var(--off) + 150%),
+        var(--color-primary) calc(var(--off) + 200%)
+        ),
+        url("vesper-monochrome.png")
+        ;
+    -webkit-mask-image: url("vesper-monochrome.png");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    mask-image: url("vesper-monochrome.png");
+    background-blend-mode: color;
+    animation: rotate-gradient 3s cubic-bezier(0.30,0.79,0.79,0.23) infinite;
+}
+
+/* .brand::before {
+    content: "";
+    opacity: 0.8;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    position: absolute;
+    translate: 40% 50%;
+    rotate: 10deg;
+    animation: brand-s 1s cubic-bezier(1,0,1,1) infinite;
+    animation-direction: alternate;
+
+    width: 20%;
+    height: 20%;
+
+    image-rendering: pixelated;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: linear-gradient(in srgb, var(--color-secondary)), url("beta.png");
+    -webkit-mask-image: url("beta.png");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    mask-image: url("beta.png");
+    background-blend-mode: color;
+}
+
+@keyframes brand-s {
+    from {
+        scale: 1;
+    }
+    to {
+        scale: 0.9;
+    }
+} */
+
+@supports (-moz-appearance: none) {
+    .brand::after {
+        background-image:
+            /* non-srgb with neg is broken in moz */
+            linear-gradient(var(--angle) in srgb, 
+                var(--color-primary) calc(var(--off) + 0%),
+                var(--color-secondary) calc(var(--off) + 50%),
+                var(--color-primary) calc(var(--off) + 100%),
+                var(--color-secondary) calc(var(--off) + 150%),
+                var(--color-primary) calc(var(--off) + 200%)
+            ),
+            url("vesper-monochrome.png");
+    }
+}
+
+@keyframes rotate-gradient {
+    0% {
+        /* --angle: 130deg; */
+
+        --off: -100%;
+    }
+    50% {
+        /* --angle: 70deg; */
+
+    }
+    100% {
+        /* --angle: 130deg; */
+        --off: 0%;
+    }
+}

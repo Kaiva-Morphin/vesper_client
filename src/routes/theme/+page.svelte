@@ -17,7 +17,7 @@
 
 </script>
 
-<div class="card-100 flex-grow h-full flex flex-col">
+<div class="card-100 flex-grow h-fit flex flex-col">
   <div>
     <button class="btn btn-error btn-border" onclick={override}>OVERRIDE THEME</button>
   </div>
@@ -26,6 +26,14 @@
   </div>
   
 
+  <div class="w-[500px] h-64 my-skeleton"></div>
+  <div class="w-[500px] h-16 grad1"></div>
+  <div class="w-[500px] h-16 grad2"></div>
+  <div class="w-[500px] h-16 grad3"></div>
+  <div class="w-[500px] h-16 grad4"></div>
+  <div class="w-[500px] h-16 grad5"></div>
+  <div class="w-[500px] h-16 grad6"></div>
+  <div class="brand"></div>
 
   <button class="btn btn-primary btn-border">primary button</button>
   <button class="btn btn-secondary btn-border">secondary button</button>
@@ -42,25 +50,46 @@
   <button class="btn btn-warning btn-border">bw button</button>
   <button class="btn btn-warning btn-disabled">disabled w button</button>
   <button class="btn btn-border btn-warning btn-disabled">disabled bw button</button>
+  <div></div>
 </div>
 
 <style>
-
-:root {
-  /* font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji; */
-  /* font-weight: 500; */
-  /* font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji; */
-  /* font-family: Space Grotesk,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji; */
-  /* font-family: Inter, Avenir, Helvetica, Arial, sans-serif; */
-  /* font-size: 16px; */
-  /* line-height: 24px; */
-  /* font-weight: 400; */
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
+.grad1{
+  background-image:
+  linear-gradient(90deg in srgb, 
+  var(--color-primary),
+  var(--color-secondary));
 }
+.grad2{
+  background-image:
+  linear-gradient(90deg in oklab, 
+  var(--color-primary),
+  var(--color-secondary));
+}
+.grad3{
+  background-image:
+  linear-gradient(90deg in lab, 
+  var(--color-primary),
+  var(--color-secondary));
+}
+.grad4{
+  background-image:
+  linear-gradient(90deg in lch, 
+  var(--color-primary),
+  var(--color-secondary));
+}
+.grad5{
+  background-image:
+  linear-gradient(90deg in oklch, 
+  var(--color-primary),
+  var(--color-secondary));
+}
+.grad6{
+  background-image:
+  linear-gradient(90deg in hsl, 
+  var(--color-primary),
+  var(--color-secondary));
+}
+
 
 </style>

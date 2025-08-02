@@ -8,7 +8,7 @@
 </script>
 
 <div class="titlebar">
-    <div  data-tauri-drag-region class="controls w-full h-[24px] bg-[#0002] flex flex-row items-center justify-end ">
+    <div  data-tauri-drag-region class="controls w-full h-[24px] bg-[#0002] flex flex-row items-center justify-end">
         <button class="no-focus unselectable" tabindex="-1" id="titlebar-minimize" on:click={(e) => {unfocus(e); appWindow.minimize()}}> 
             <Icon icon="fluent:minimize-16-filled" height="16px"></Icon>
         </button>
@@ -22,9 +22,13 @@
     </div>
 </div>
 <style>
-
+:global{
+    :root {
+        --titlebar-size: 24px;
+    }
+}
 .titlebar {
-    height: 24px;
+    height: var(--titlebar-size);
     z-index: 1000;
     user-select: none;
     display: grid;
@@ -32,9 +36,11 @@
     top: 0;
     left: 0;
     right: 0;
-    /* background: #AAA2; */
-    background-image: var(--bg-100);
-    box-shadow: inset 0px 3px 6px color-mix(in srgb, var(--color-secondary) 40%, #0000);
+    /* background: #080808FF; */
+    background-image: var(--bg-200);
+    backdrop-filter: blur(4px);
+    /* box-shadow: inset 0px 3px 6px color-mix(in srgb, var(--color-secondary) 40%, #0000); */
+    /* box-shadow: inset 0px 1px 4px 3px color-mix(in srgb, var(--color-secondary) 60%, #000); */
 }
 
 .titlebar > .controls {
@@ -43,7 +49,7 @@
 
 .titlebar button {
     width: 30px;
-    height: 24px;
+    height: var(--titlebar-size);
     appearance: none;
     padding: 0;
     margin: 0;
