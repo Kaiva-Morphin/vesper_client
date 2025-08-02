@@ -61,11 +61,20 @@
 
 
 
-<div data-circle-avatar class="flex-grow flex vh justify-center relative">
+<div class="flex-grow flex justify-center relative vh"
+
+data-circle-avatar
+data-smooth-bg
+data-bg-gradient
+
+>
     <video autoplay loop muted playsinline class="bg-video" poster="/placeholder.jpg">
         <source src="http://localhost:2000/bg.mp4" type="video/mp4" class="">
+        <source src="http://localhost:2000/bg.mp4" type="video/wav" class="">
     </video>
-    <div class="w-full flex justify-center relative" data-bg-gradient>
+    <!-- <img class="bg-video" src="/placeholder.jpg" alt=""> -->
+
+    <div class="w-full flex justify-center relative" >
         <div class="w-full flex flex-col h-fit gap-2 max-w-[960px]"> 
             <div class="w-full max-h-[512px] flex flex-col relative">
                 <img src="/placeholder.jpg" class="h-[256px] banner" alt="">
@@ -111,6 +120,12 @@
                         <div class="w-full h-full card-base card-200 card-200-border"></div>
                     </div>
 
+                    <div class="flex-grow h-[1000px] flex flex-col p-2 gap-2 card-base card-100 card-100-border">
+                        <div class="w-full h-full card-base card-200 card-200-border"></div>
+                    </div>
+                    <div class="flex-grow h-[1000px] flex flex-col p-2 gap-2 card-base card-100 card-100-border">
+                        <div class="w-full h-full card-base card-200 card-200-border"></div>
+                    </div>
                     <div class="flex-grow h-[1000px] flex flex-col p-2 gap-2 card-base card-100 card-100-border">
                         <div class="w-full h-full card-base card-200 card-200-border"></div>
                     </div>
@@ -199,6 +214,9 @@
         mask-image: radial-gradient(circle at top left, transparent 0%, black 20%, black 80%, transparent 100%);
         mask-composite: intersect; */
     }
+    [data-smooth-bg] .bg-video {
+        mask-image: linear-gradient(to top, transparent, black 64px, black);
+    }
 
     
 
@@ -229,7 +247,6 @@
         border-bottom-left-radius: 72px;
     }
 
-    
     [data-bg-gradient] .card-100 {
         background: var(--bg-100);
         /* background: linear-gradient(105deg, 
@@ -245,9 +262,6 @@
         background-color: color-mix(in srgb, var(--color-primary) 20%, #0003);
         background-origin: border-box;
     }
-
-    
-    
     [data-bg-gradient] .card-200 {
         background: linear-gradient(105deg, 
                 color-mix(in oklab, var(--color-primary) 4%, #3332), 
@@ -264,8 +278,4 @@
         background-color: color-mix(in oklch, var(--color-primary) 6%, #0002);
         background-origin: border-box;
     }
-    
-
-
-    
 </style>

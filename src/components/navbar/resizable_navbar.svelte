@@ -1,7 +1,6 @@
 <script lang="ts">
     import NavbarItem from "./item.svelte";
-
-    
+    import { Svroller } from "svrollbar";
     let states = [0, 48, 200];
 	let flexBasis = $state(states[1]);
     let edges : {edge: number, pos: number}[] = [];
@@ -37,12 +36,12 @@
 
 <style>
 	.content_wrapper {
-		position: relative;
+		/* position: relative; */
 		/* height: 100%; */
         /* width: 100%; */
-		display: flex;
-		flex-direction: column;
-		overflow: visible;
+		/* display: flex; */
+		/* flex-direction: column; */
+		/* overflow: visible; */
 	}
 
 	.content_container {
@@ -56,7 +55,7 @@
         padding: 4px 5px 4px 3px;
         backdrop-filter: blur(3px);
         border-radius: 0 var(--radius-box) var(--radius-box) 0;
-		position: relative;
+		position: absolute;
 		box-sizing: border-box;
 		min-width: 0;
         /* background: color-mix(in srgb, var(--color-primary) 3%, #0000); */
@@ -71,14 +70,12 @@
 	.resizer {
 		flex-basis: 0px;
 		position: relative;
-		z-index: 2;
         cursor: ew-resize;
+        z-index: 10;
         /* border-left: 2px solid #33364240; */
         /* box-shadow: var(--box-shadow); */
         /* box-shadow: -4px 0 4px color-mix(in srgb, var(--color-secondary) 10%, #0000); */
 		box-sizing: border-box;
-
-
 	}
     .resizer_handle {
         position: absolute;
@@ -105,45 +102,38 @@
         background-color: rgba(255, 0, 0, 1.0);
     } */
 
-    .bg-video {
-        z-index: -10;
-        left: 50%;
-        transform: translateX(-50%);
-    }
 
 </style>
-
-<div class="content_wrapper">
-	<div class="content_container overflow-y-scroll">
+<div class="w-full vh">
+    {#if flexBasis > 0}
+    <div class="absolute vh z-30 sidebar flex flex-col gap-1 no-scrollbar" style="width: {flexBasis}px">
+        <NavbarItem link="/" icon="mingcute:home-4-line">Home</NavbarItem>
+        <NavbarItem link="/u" icon="mingcute:user-search-line">Users</NavbarItem>
+        <NavbarItem link="/calls" icon="tabler:phone">Calls</NavbarItem>
+        <NavbarItem link="/social" icon="mingcute:group-3-line">Social</NavbarItem>
+        <div class="flex-grow"></div>
+        <NavbarItem link="/0playground" icon="mingcute:bug-line">0playground</NavbarItem>
+        <NavbarItem link="/scroll" icon="mingcute:mouse-line">Scroll test</NavbarItem>
+        <div class="flex-grow"></div>
+        <NavbarItem link="/u/test_user" icon="mingcute:user-3-line">User</NavbarItem>
+        <NavbarItem link="/register" icon="mingcute:user-add-2-line">Register</NavbarItem>
+        <NavbarItem link="/theme" icon="mingcute:paint-brush-ai-line">Themes</NavbarItem>
+        <NavbarItem link="/settings" icon="mingcute:settings-1-line">Settings</NavbarItem>
+        <NavbarItem link="/about" icon="mingcute:information-line">About</NavbarItem>
+    </div>
+    {/if}
+    <Svroller width="" height="">
+        <div class="flex flex-row overflow-x-clip -z-100">
         {#if flexBasis > 0}
-		<div
-			style:flex-basis={`${flexBasis}px`}
-            class = "sidebar flex flex-col gap-1 no-scrollbar"
-		>
-                <NavbarItem link="/" icon="mingcute:home-4-line">Home</NavbarItem>
-                <NavbarItem link="/u" icon="mingcute:user-search-line">Users</NavbarItem>
-                <NavbarItem link="/calls" icon="tabler:phone">Calls</NavbarItem>
-                <NavbarItem link="/social" icon="mingcute:group-3-line">Social</NavbarItem>
-                <!-- <HorizontalSeparator gradient/> -->
-                <div class="flex-grow"></div>
-                <NavbarItem link="/0playground" icon="mingcute:bug-line">0playground</NavbarItem>
-                <NavbarItem link="/scroll" icon="mingcute:mouse-line">Scroll test</NavbarItem>
-                <!-- <HorizontalSeparator gradient/> -->
-                <div class="flex-grow"></div>
-                <NavbarItem link="/u/test_user" icon="mingcute:user-3-line">User</NavbarItem>
-                <NavbarItem link="/register" icon="mingcute:user-add-2-line">Register</NavbarItem>
-                <NavbarItem link="/theme" icon="mingcute:paint-brush-ai-line">Themes</NavbarItem>
-                <!-- <HorizontalSeparator gradient/> -->
-                <NavbarItem link="/settings" icon="mingcute:settings-1-line">Settings</NavbarItem>
-                <NavbarItem link="/about" icon="mingcute:information-line">About</NavbarItem>
-		</div>
+            <div class="h-screen w-[30px]" style="flex-basis: {flexBasis}px">
+            </div>  
         {/if}
-		<!-- svelte-ignore event_directive_deprecated -->
-	    <!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="resizer" onmousedown={handleMouseDown}>
+
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div class="resizer" onmousedown={handleMouseDown}>
             <div class="resizer_handle {flexBasis == 0? "visible_handle":""}"></div>
         </div>
         <slot/>
-	</div>
-</div>
-
+        </div>
+    </Svroller>
+</div> 
