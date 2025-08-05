@@ -3,7 +3,7 @@
     import CollapseSetting from "../../components/content/collapse_setting.svelte";
 
     import ColorPicker, { type RgbaColor } from 'svelte-awesome-color-picker';
-    import { default_themes, setDefaultTheme, THEME, themeColorKeys, themePercentKeys} from "$lib/theme.svelte";
+    import { default_themes, flexThemeTypes, setDefaultTheme, THEME} from "$lib/theme.svelte";
     import { get } from "svelte/store";
     import LabelSeparator from "../../components/content/label_separator.svelte";
     import BorderInput from "../../components/content/border_input.svelte";
@@ -46,86 +46,21 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
 
                 <LabelSeparator><h2>Customize</h2></LabelSeparator>
                 <div class="flex flex-row p-2 card-base card-100 card-100-border">
-                    <div class="flex flex-col p-2 gap-2 w-64">
-                        <BorderInput placeholder="Theme name" icon="" class="input-primary"></BorderInput>
-                        <div class="flex items-center gap-2">
-                            <label class="cursor-pointer flex items-center gap-2">
-                                <BorderCheckbox checked={false} class="checkbox-primary"/>Neo theme?</label> 
-                        </div>
-                        <button class="btn btn-primary btn-border">Save</button>
-                    </div>
-                            <!-- class="w-full h-full" -->
-
                     <div class="grid grid-rows-4 w-full h-full p-2 grid-flow-col">
-                        {#each themeColorKeys as t}
+                        {#each flexThemeTypes.RgbaColor as t}
                             <ColorPicker
-                                label={t}
+                                label={$THEME[t].display_name}
                                 isAlpha={false}
-                                bind:rgb={$THEME.color[t]}
+                                bind:rgb={$THEME[t].value as RgbaColor}
                             />
                         {/each}
-                        {#each themePercentKeys as t}
-                            <input type="range" min="0" max="20" class="range"  bind:value={$THEME.percent[t]}/>
-                        {/each}
-                        <!-- <ColorPicker
-                            label="Primary"
-                            isAlpha={false}
-                            bind:rgb={$THEME.primary}
-                        />
-                        <ColorPicker
-                            label="Secondary"
-                            isAlpha={false}
-                            bind:rgb={$THEME.secondary}
-                        />
-                        <ColorPicker
-                            label="Accent"
-                            isAlpha={false}
-                            bind:rgb={$THEME.accent}
-                        />
-                        <ColorPicker
-                            label="Primary content"
-                            isAlpha={false}
-                            bind:rgb={$THEME.primary_content}
-                        />
-                        <ColorPicker
-                            label="Secondary content"
-                            isAlpha={false}
-                            bind:rgb={$THEME.secondary_content}
-                        />
-                        <ColorPicker
-                            label="Accent content"
-                            isAlpha={false}
-                            bind:rgb={$THEME.accent_content}
-                        />
-                        <ColorPicker
-                            label="Primary"
-                            isAlpha={false}
-                            bind:rgb={$THEME.primary_content}
-                        />
-                        <ColorPicker
-                            label="Secondary"
-                            isAlpha={false}
-                            bind:rgb={$THEME.primary_content}
-                        />
-                        <ColorPicker
-                            label="Accent"
-                            isAlpha={false}
-                            bind:rgb={$THEME.primary_content}
-                        />
-                        <ColorPicker
-                            label="Primary"
-                            isAlpha={false}
-                            bind:rgb={$THEME.primary_content}
-                        />
-                        <ColorPicker
-                            label="Secondary"
-                            isAlpha={false}
-                            bind:rgb={$THEME.primary_content}
-                        />
-                        <ColorPicker
-                            label="Accent"
-                            isAlpha={false}
-                        /> -->
+                        <div class="flex items-center gap-2">
+                            <label class="cursor-pointer flex items-center gap-2 pl-2"><BorderCheckbox checked={$THEME.neo as unknown as boolean} class="checkbox-primary"/>Neo theme?</label> 
+                        </div>
+                    </div>
+                    <div class="flex flex-col p-2 gap-2 w-64">
+                        <BorderInput placeholder="Theme name" icon="" class="input-primary"></BorderInput>
+                        <button class="btn btn-primary btn-border">Save</button>
                     </div>
                 </div>
                 

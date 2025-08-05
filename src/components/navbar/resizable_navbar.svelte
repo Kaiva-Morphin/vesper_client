@@ -105,7 +105,6 @@
         <div class="flex-grow"></div>
         <NavbarItem link="/u/test_user" icon="mingcute:user-3-line">User</NavbarItem>
         <NavbarItem link="/register" icon="mingcute:user-add-2-line">Register</NavbarItem>
-        <NavbarItem link="/theme" icon="mingcute:paint-brush-ai-line">Themes</NavbarItem>
         <NavbarItem link="/settings" icon="mingcute:settings-1-line">Settings</NavbarItem>
         <NavbarItem link="/about" icon="mingcute:information-line">About</NavbarItem>
     </div>

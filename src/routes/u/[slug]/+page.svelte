@@ -43,7 +43,7 @@ data-container-opaque
 <div 
 style=""
 data-smooth-bg
-
+data-container-gradient
 class="flex-grow flex justify-center relative vh min-w-[900px]">
     <video autoplay loop muted playsinline class="bg-video" poster="/placeholder.jpg">
         <source src="http://localhost:2000/bg.mp4" type="video/mp4" class="">

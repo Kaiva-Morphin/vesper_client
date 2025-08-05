@@ -1,14 +1,11 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import { init } from "./theme.svelte";
 import "$lib/api/base.svelte";
 import "$lib/turnstile.ts";
 import { clearRefresh, refresh } from "./api/auth.svelte";
 
 // import { TURNSTILE_SITE_KEY } from "$env/static/public";
 onMount(() => {
-	const style = getComputedStyle(document.documentElement);
-	init(style);
 	console.debug("[SYSTEM] Initial styles applied");
 });
 
