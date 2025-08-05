@@ -51,11 +51,11 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                             <ColorPicker
                                 label={$THEME[t].display_name}
                                 isAlpha={false}
-                                bind:rgb={$THEME[t].value as RgbaColor}
+                                bind:rgb={$THEME[t].value as RgbaColor /*stupid ts*/}
                             />
                         {/each}
                         <div class="flex items-center gap-2">
-                            <label class="cursor-pointer flex items-center gap-2 pl-2"><BorderCheckbox checked={$THEME.neo as unknown as boolean} class="checkbox-primary"/>Neo theme?</label> 
+                            <label class="cursor-pointer flex items-center gap-2 pl-2"><BorderCheckbox bind:checked={$THEME.neo.value} class="checkbox-primary"/>Neo theme?</label> 
                         </div>
                     </div>
                     <div class="flex flex-col p-2 gap-2 w-64">

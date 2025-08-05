@@ -1,7 +1,7 @@
 import { oklchToRGB } from "$lib/util.svelte";
 import { get, writable, type Writable } from "svelte/store";
 
-export const default_themes = ["simple_dark", "night", "myabyss", "dracula", "synthwave", "retro", "forest", "night", "aqua"]
+export const default_themes = ["simple_dark", "night", "myabyss", "dracula", "synthwave", "retro", "forest", "aqua"]
 
 
 import type { RgbaColor } from "svelte-awesome-color-picker";
@@ -12,6 +12,8 @@ export const rgbToCss = (c: RgbaColor) => `rgb(${c.r}, ${c.g}, ${c.b})`;
 export const percentToCss = (c: number) => `${c}%`;
 export const pxToCss = (c: number) => `${c}px`;
 export const rgbToArr = (c: RgbaColor) : [number, number, number] => [c.r, c.g, c.b];
+
+// 🧑‍🎤
 
 class CssStyleProperty<T> {
     key: string;
@@ -39,7 +41,11 @@ class CssStyleProperty<T> {
 
     apply(el: HTMLElement) {
         if (this.data_key) {
-            el.setAttribute(this.data_key, this.value as any);
+            switch (this.typename) {
+                case "data_mark":
+                    // this.value as boolean ? el.setAttribute(this.data_key, "") : el.removeAttribute(this.data_key);
+                    break;
+            }
         } else {
             el.style.setProperty(this.css_key, this.toCssString());
         }
@@ -57,8 +63,6 @@ class CssStyleProperty<T> {
             return (this.value as unknown as number).toString();
         case "string":
             return this.value as unknown as string;
-        case "boolean":
-            return (this.value as unknown as boolean).toString();
         default:
             console.error("[CssStyleProperty] Unknown type: " + this.typename + " for key: " + this.key);
             return "";
@@ -71,30 +75,50 @@ class CssStyleProperty<T> {
         display_name: string,
         cssValue: string,
         type: keyof TypeMap,
-        data_key?: string
+        data_key?: string,
+        data_value?: string
     ): CssStyleProperty<T> {
         let value: any;
-
         switch (type) {
-        case "RgbaColor":
-            value = CssStyleProperty.parseOklch(cssValue);
-            break;
-        case "percent":
-            value = CssStyleProperty.parsePercent(cssValue);
-            break;
-        case "px":
-            value = CssStyleProperty.parsePx(cssValue);
-            break;
-        case "number":
-            value = parseFloat(cssValue) || 0;
-            break;
-        case "string":
-            value = cssValue;
-            break;
-        default:
-            value = cssValue;
+            case "RgbaColor":
+                value = CssStyleProperty.parseOklch(cssValue);
+                break;
+            case "percent":
+                value = CssStyleProperty.parsePercent(cssValue);
+                break;
+            case "px":
+                value = CssStyleProperty.parsePx(cssValue);
+                break;
+            case "number":
+                value = parseFloat(cssValue) || 0;
+                break;
+            case "string":
+                value = cssValue;
+                break;
+            case "data_mark":
+                value = cssValue;
+                break;
+            default:
+                value = cssValue;
         }
 
+        return new CssStyleProperty<T>(key, css_key, display_name, type, value, data_key);
+    }
+
+    static fromDataValue<T>(
+        key: string,
+        css_key: string,
+        display_name: string,
+        type: keyof TypeMap,
+        data_key?: string,
+        data_value?: null | string
+    ): CssStyleProperty<T> {
+        let value: any;
+        switch (type) {
+            case "data_mark":
+                value = data_value?.trim() === "true";
+                break;
+        }
         return new CssStyleProperty<T>(key, css_key, display_name, type, value, data_key);
     }
 
@@ -121,109 +145,97 @@ class CssStyleProperty<T> {
 }
 
 
+
 type TypeMap = {
   RgbaColor: RgbaColor;
   number: number;
   string: string;
   percent: number;
   px: number;
-  boolean: boolean;
+  data_mark: boolean;
 };
 
 
-const properties : {typename: keyof TypeMap, key: string, css_key: string, display_name: string, data_key?: string }[] = [
-  { typename: "RgbaColor", key: "primary", css_key: "--color-primary", display_name: "Primary color" },
-  { typename: "RgbaColor", key: "primary_content", css_key: "--color-primary-content", display_name: "Primary content" },
-  { typename: "RgbaColor", key: "secondary", css_key: "--color-secondary", display_name: "Secondary color" },
-  { typename: "RgbaColor", key: "secondary_content", css_key: "--color-secondary-content", display_name: "Secondary content" },
-  { typename: "RgbaColor", key: "accent", css_key: "--color-accent", display_name: "Accent color" },
-  { typename: "RgbaColor", key: "accent_content", css_key: "--color-accent-content", display_name: "Accent content" },
-  { typename: "RgbaColor", key: "info", css_key: "--color-info", display_name: "Info color" },
-  { typename: "RgbaColor", key: "info_content", css_key: "--color-info-content", display_name: "Info content" },
-  { typename: "RgbaColor", key: "success", css_key: "--color-success", display_name: "Success color" },
-  { typename: "RgbaColor", key: "success_content", css_key: "--color-success-content", display_name: "Success content" },
-  { typename: "RgbaColor", key: "error", css_key: "--color-error", display_name: "Error color" },
-  { typename: "RgbaColor", key: "error_content", css_key: "--color-error-content", display_name: "Error content" },
-  { typename: "RgbaColor", key: "base_content", css_key: "--color-base-content", display_name: "Base content" },
-  { typename: "percent", key: "tint_100", css_key: "--tint-100o", display_name: "Tint 100%" },
-  { typename: "percent", key: "tint_200", css_key: "--tint-200o", display_name: "Tint 200%" },
-  { typename: "px", key: "radius_selector", css_key: "--radius_selector", display_name: "Radius selector" },
-  { typename: "px", key: "radius_field", css_key: "--radius_field", display_name: "Radius field" },
-  { typename: "px", key: "radius_box", css_key: "--radius_box", display_name: "Radius box" },
-  { typename: "boolean", key: "neo", css_key: "", display_name: "Neo theme", data_key: "data-neo" },
-] as const;
+const properties = {
+  neo: { typename: "data_mark", css_key: "data-neo", display_name: "Neo theme", data_key: "data-neo" },
+  primary: { typename: "RgbaColor", css_key: "--color-primary", display_name: "Primary color" },
+  primary_content: { typename: "RgbaColor", css_key: "--color-primary-content", display_name: "Primary content" },
+  secondary: { typename: "RgbaColor", css_key: "--color-secondary", display_name: "Secondary color" },
+  secondary_content: { typename: "RgbaColor", css_key: "--color-secondary-content", display_name: "Secondary content" },
+  accent: { typename: "RgbaColor", css_key: "--color-accent", display_name: "Accent color" },
+  accent_content: { typename: "RgbaColor", css_key: "--color-accent-content", display_name: "Accent content" },
+  info: { typename: "RgbaColor", css_key: "--color-info", display_name: "Info color" },
+  info_content: { typename: "RgbaColor", css_key: "--color-info-content", display_name: "Info content" },
+  success: { typename: "RgbaColor", css_key: "--color-success", display_name: "Success color" },
+  success_content: { typename: "RgbaColor", css_key: "--color-success-content", display_name: "Success content" },
+  error: { typename: "RgbaColor", css_key: "--color-error", display_name: "Error color" },
+  error_content: { typename: "RgbaColor", css_key: "--color-error-content", display_name: "Error content" },
+  base_content: { typename: "RgbaColor", css_key: "--color-base-content", display_name: "Base content" },
+  tint_100: { typename: "percent", css_key: "--tint-100o", display_name: "Tint 100%" },
+  tint_200: { typename: "percent", css_key: "--tint-200o", display_name: "Tint 200%" },
+  radius_selector: { typename: "px", css_key: "--radius_selector", display_name: "Radius selector" },
+  radius_field: { typename: "px", css_key: "--radius_field", display_name: "Radius field" },
+  radius_box: { typename: "px", css_key: "--radius_box", display_name: "Radius box" },
+} as const;
 
-type Properties = typeof properties[number];
+type PropertiesMap = typeof properties;
 
-type FlexThemeValues = {
-  [P in Properties as P["key"]]: TypeMap[P["typename"]];
-};
+type PropertyKey = keyof PropertiesMap;
 
 type FlexTheme = {
-  [P in Properties as P["key"]]: CssStyleProperty<TypeMap[P["typename"]]>;
+  [K in PropertyKey]: CssStyleProperty<TypeMap[PropertiesMap[K]["typename"]]>;
+};
+
+type FlexThemeValues = {
+  [K in PropertyKey]: TypeMap[PropertiesMap[K]["typename"]];
 };
 
 export const flexThemeTypes = {
-    RgbaColor: properties
-        .filter(p => p.typename === "RgbaColor")
-        .map(p => p.key),
-    percent: properties
-        .filter(p => p.typename === "percent")
-        .map(p => p.key),
-    px: properties
-        .filter(p => p.typename === "px")
-        .map(p => p.key),
-    string: properties
-        .filter(p => p.typename === "string")
-        .map(p => p.key),
-    number: properties
-        .filter(p => p.typename === "number")
-        .map(p => p.key),
-    boolean: properties
-        .filter(p => p.typename === "boolean")
-        .map(p => p.key),
+    RgbaColor: Object.entries(properties)
+        .filter(([, value]) => value.typename === "RgbaColor")
+        .map(([key]) => key as PropertyKey),
+    percent: Object.entries(properties)
+        .filter(([, value]) => value.typename === "percent")
+        .map(([key]) => key as PropertyKey),
+    px: Object.entries(properties)
+        .filter(([, value]) => value.typename === "px")
+        .map(([key]) => key as PropertyKey),
 } as const;
 
-let a = flexThemeTypes.RgbaColor;
 
-function themeFromCss(styles: CSSStyleDeclaration, el?: HTMLElement): FlexTheme {
-  return properties.reduce((acc, prop) => {
-    let rawValue = styles.getPropertyValue(prop.css_key).trim();
+const root = document.documentElement;
+let init_style = getComputedStyle(root);
+export let THEME : Writable<FlexTheme> = writable(themeFromCss(root, init_style));
 
-    if (el && prop.data_key && el.hasAttribute(prop.data_key)) {
-      rawValue = el.getAttribute(prop.data_key)!.trim();
+
+function themeFromCss(el: HTMLElement, styles: CSSStyleDeclaration): FlexTheme {
+    const result = {} as any;
+    for (const key in properties) {
+        const prop = properties[key as PropertyKey];
+        const cssValue = styles.getPropertyValue(prop.css_key).trim();
+        if ('data_key' in prop) {
+            let data = el.getAttribute(prop.data_key);
+            result[key] = CssStyleProperty.fromDataValue(key, prop.css_key, prop.display_name, prop.typename, prop.data_key, data);
+        } else {
+            result[key] = CssStyleProperty.fromCssValue(key, prop.css_key, prop.display_name, cssValue, prop.typename);
+        }
     }
-
-    acc[prop.key as keyof FlexTheme] = CssStyleProperty.fromCssValue(
-      prop.key,
-      prop.css_key,
-      prop.display_name,
-      rawValue,
-      prop.typename,
-      prop.data_key
-    );
-
-    return acc;
-  }, {} as FlexTheme);
+    return result;
 }
 
 
 export function applyTheme(theme: FlexTheme, el: HTMLElement) {
-  for (const key in theme) {
-    theme[key as keyof FlexTheme].apply(el);
-  }
+    for (const key in theme) {
+        theme[key as keyof FlexTheme].apply(el);
+    }
 }
 
-const root = document.documentElement;
 
-let init_style = getComputedStyle(document.documentElement);
 
 let theme_override : null | FlexTheme = null;
 
-export let THEME : Writable<FlexTheme> = writable(themeFromCss(init_style));
 
 THEME.subscribe((new_theme) => {
-    console.log("NEW THEME");
     applyTheme(new_theme, root);
 })
 
@@ -233,8 +245,10 @@ export function setDataToElement(el: HTMLElement, k: string, v: string | null) {
 }
 
 export function clearFlexTheme(el: HTMLElement){
-    for (const key of properties) {
-        el.style.removeProperty(key.css_key);
+    for (const key in properties) {
+        const prop = properties[key as PropertyKey];
+        el.style.removeProperty(prop.css_key);
+        if ('data_key' in prop) el.removeAttribute(prop.data_key);
     }
 }
 
@@ -254,8 +268,9 @@ export function setNonOverrideTheme(t: string | FlexTheme) {
     if (typeof t === "string") {
         clearFlexTheme(root);
         setDataToElement(root, "data-theme", t);
-        setDataToElement(root, "data-neo", t.includes("simple") ? null : "");
-        THEME.set(themeFromCss(getComputedStyle(document.documentElement)));
+        setDataToElement(root, "data-neo", t.includes("simple") ? null : "true");
+        
+        THEME.set(themeFromCss(root, getComputedStyle(document.documentElement)));
         console.log("DEF");
         return;
     } else {
