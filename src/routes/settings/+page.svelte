@@ -3,7 +3,7 @@
     import CollapseSetting from "../../components/content/collapse_setting.svelte";
 
     import ColorPicker, { type RgbaColor } from 'svelte-awesome-color-picker';
-    import { default_themes, flexThemeTypes, setDefaultTheme, THEME} from "$lib/theme.svelte";
+    import { default_themes, appThemeTypes, setDefaultTheme, THEME} from "$lib/theme/app.svelte";
     import { get } from "svelte/store";
     import LabelSeparator from "../../components/content/label_separator.svelte";
     import BorderInput from "../../components/content/border_input.svelte";
@@ -47,7 +47,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                 <LabelSeparator><h2>Customize</h2></LabelSeparator>
                 <div class="flex flex-row p-2 card-base card-100 card-100-border">
                     <div class="grid grid-rows-4 w-full h-full p-2 grid-flow-col">
-                        {#each flexThemeTypes.RgbaColor as t}
+                        {#each appThemeTypes.RgbaColor as t}
                             <ColorPicker
                                 label={$THEME[t].display_name}
                                 isAlpha={false}
@@ -59,7 +59,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                         </div>
                     </div>
                     <div class="flex flex-col p-2 gap-2 w-64">
-                        <BorderInput placeholder="Theme name" icon="" class="input-primary"></BorderInput>
+                        <BorderInput placeholder="Theme name" icon="mingcute:palette-line" class="input-primary"></BorderInput>
                         <button class="btn btn-primary btn-border">Save</button>
                     </div>
                 </div>
@@ -67,7 +67,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                 
             </div>
         </CollapseSetting>
-        <CollapseSetting icon="mingcute:app-line">
+        <CollapseSetting icon="tabler:photo">
 
         </CollapseSetting>
     </div>

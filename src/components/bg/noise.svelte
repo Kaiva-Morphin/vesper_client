@@ -113,9 +113,6 @@ void main() {
     fragColor = vec4(sample_step(uv), 1.0);
 }
 `;
-    import { rgbToArr } from "$lib/theme.svelte";
-    import { get } from "svelte/store";
-    // bg_color, 
     let startTime = Date.now();
     let currentTime = $state(startTime);
     function update_time() {
@@ -124,7 +121,6 @@ void main() {
     }
     let primary_color : [number, number, number] = [1, 1, 1];
     let color = $state(primary_color);
-    // primary_color.subscribe((v) => color = rgbToArr(v))
     update_time()
 </script>
 
