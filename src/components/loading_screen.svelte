@@ -15,10 +15,10 @@
     (async () => {
         if (await refresh()){
             console.log("[AUTH] Access token successfully obtained!");
-            // goto("/login");
         } else {
-            console.log("[AUTH] Can't get access token, logging out!")
-            clearRefresh();
+            // todo! check for a response status. if service is unavailable, show an err 
+            // console.log("[AUTH] Can't get access token, logging out!")
+            // clearRefresh();
             goto("/login");
         }
         loading = false;

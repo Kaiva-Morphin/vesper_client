@@ -1,5 +1,5 @@
 <script lang="ts">
-  let {extra_class = "", checked = $bindable()} : {extra_class? : string, checked : boolean} = $props();
+  let {class : extra_class = "", checked = $bindable()} : {class? : string, checked : boolean} = $props();
 </script>
 <input bind:checked={checked} type="checkbox" class={`checkbox checkbox-border ${extra_class}`} />
 <style>

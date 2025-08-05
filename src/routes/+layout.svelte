@@ -33,7 +33,7 @@
 {:else}
 <ScriptEntrypoint/>
 <Debug/>
-<BackgroundShaderNoise/>
+<!-- <BackgroundShaderNoise/> -->
 <LoadingScreen/>
 <ToastContainer />
 <div id="main_container" class="flex flex-col h-screen w-screen">

@@ -8,7 +8,7 @@
     let { link, icon }: Props = $props(); 
     import { page } from '$app/state';
 </script>
-
+<!-- TODO: ACTIVE STYLE -->
 <a href={link} class={`relative btn btn-primary gap-2 flex flex-row navbar_button ${page.url.pathname.startsWith(link) ? "active_navbar_button" : "btn-ghost"}`}>
     <Icon icon={icon} height=24px class="min-w-[24px] shd"/>
     <slot></slot>

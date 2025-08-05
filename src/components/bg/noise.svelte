@@ -113,13 +113,18 @@ void main() {
     fragColor = vec4(sample_step(uv), 1.0);
 }
 `;
-    import { bg_color, primary_color } from "$lib/theme.svelte";
+    import { rgbToArr } from "$lib/theme.svelte";
+    import { get } from "svelte/store";
+    // bg_color, 
     let startTime = Date.now();
     let currentTime = $state(startTime);
     function update_time() {
         currentTime = (Date.now() - startTime) / 1000;
         requestAnimationFrame(update_time)
     }
+    let primary_color : [number, number, number] = [1, 1, 1];
+    let color = $state(primary_color);
+    // primary_color.subscribe((v) => color = rgbToArr(v))
     update_time()
 </script>
 
@@ -130,8 +135,8 @@ void main() {
             { name: "u_resolution", value: "resolution" },
             { name: "u_offset", value: "offset" },
             { name: "u_time", type:"float", value: currentTime },
-            { name: "u_colorPrimary", type: "vec3", value: $primary_color },
-            { name: "u_colorBg", type: "vec3", value: $bg_color },
+            { name: "u_colorPrimary", type: "vec3", value: color },
+            { name: "u_colorBg", type: "vec3", value: [0, 0, 0] },
         ]}
     >
         <div class="fallback">WebGL not supported in this environment.</div>

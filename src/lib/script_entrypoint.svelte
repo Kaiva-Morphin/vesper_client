@@ -6,12 +6,12 @@ import "$lib/turnstile.ts";
 import { clearRefresh, refresh } from "./api/auth.svelte";
 
 // import { TURNSTILE_SITE_KEY } from "$env/static/public";
-
 onMount(() => {
 	const style = getComputedStyle(document.documentElement);
 	init(style);
 	console.debug("[SYSTEM] Initial styles applied");
 });
+
 
 // window.onloadTurnstileCallback = function () {
 //   turnstile.render("#example-container", {

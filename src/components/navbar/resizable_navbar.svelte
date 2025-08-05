@@ -34,26 +34,11 @@
 
 </script>
 
+<!-- svelte-ignore css_unused_selector -->
 <style>
-	.content_wrapper {
-		/* position: relative; */
-		/* height: 100%; */
-        /* width: 100%; */
-		/* display: flex; */
-		/* flex-direction: column; */
-		/* overflow: visible; */
-	}
-
-	.content_container {
-		/* height: 100%; */
-        /* width: 100%; */
-		display: flex;
-		box-sizing: border-box;
-	}
-
 	.sidebar {
         padding: 4px 5px 4px 3px;
-        backdrop-filter: blur(3px);
+        backdrop-filter: blur(8px);
         border-radius: 0 var(--radius-box) var(--radius-box) 0;
 		position: absolute;
 		box-sizing: border-box;
@@ -101,9 +86,12 @@
     /* .resizer_handle:hover, .resizer_handle:active  {
         background-color: rgba(255, 0, 0, 1.0);
     } */
-
+    .fa {
+        flex: 1 0 auto;
+    }
 
 </style>
+
 <div class="w-full vh">
     {#if flexBasis > 0}
     <div class="absolute vh z-30 sidebar flex flex-col gap-1 no-scrollbar" style="width: {flexBasis}px">
@@ -122,18 +110,21 @@
         <NavbarItem link="/about" icon="mingcute:information-line">About</NavbarItem>
     </div>
     {/if}
+
     <Svroller width="" height="">
         <div class="flex flex-row overflow-x-clip -z-100">
-        {#if flexBasis > 0}
-            <div class="h-screen w-[30px]" style="flex-basis: {flexBasis}px">
-            </div>  
-        {/if}
+            {#if flexBasis > 0}
+                <div class="h-screen w-[30px]" style="flex-basis: {flexBasis}px">
+                </div>  
+            {/if}
 
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div class="resizer" onmousedown={handleMouseDown}>
-            <div class="resizer_handle {flexBasis == 0? "visible_handle":""}"></div>
-        </div>
-        <slot/>
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <div class="resizer" onmousedown={handleMouseDown}>
+                <div class="resizer_handle {flexBasis == 0? "visible_handle":""}"></div>
+            </div>
+            <slot/>
+            <div class="fa" style="max-width: {flexBasis}px"></div>
         </div>
     </Svroller>
 </div> 
+

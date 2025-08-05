@@ -2,11 +2,23 @@
     --border: 2px;
     --depth: 0;
     --noise: 0;
-    transition-property: color, background-color, outline-color, gap, outline-width, box-shadow, outline-offset, outline-color, transform, border-radius, border-color;
+    /* transition-property: color, background-color, outline-color, gap, outline-width, box-shadow, outline-offset, outline-color, transform, border-radius, border-color; */
     /* transition-timing-function: cubic-bezier(0.5, 1, 0.89, 1); */
     /* transition-duration: 0.15s; */
-    transition-duration: 0.4s;
+    /* transition-duration: 0.25s; */
 
+
+    --titlebar-size: 0px;
+    --vh: calc(100vh - var(--titlebar-size));
+
+    --tint-100o: 12%;
+    --tint-200o: 15%;
+    --tint-300o: 17%;
+}
+
+
+
+.theme-calc {
     --color-shadow: #010101;
     --shadow-radius: 6px;
     --shadow-offset: 0px 0px;
@@ -27,6 +39,9 @@
     --tint-200: 50%;
     --tint-300: 75%;
 
+    
+
+
     --tinted-pri-100: color-mix(in srgb, var(--color-primary) var(--tint-100), #FFF);
     --tinted-pri-200: color-mix(in srgb, var(--color-primary) 10%, #000);
     
@@ -35,25 +50,25 @@
 
     --tinted-sec-100: color-mix(in srgb, var(--color-secondary) var(--tint-100), #FFF0);
     --tinted-sec-200: color-mix(in srgb, var(--color-secondary) var(--tint-200), #FFF0);
-    --tinted-sec-100o: color-mix(in srgb, var(--color-secondary) 12%, #000000);
-    --tinted-sec-200o: color-mix(in srgb, var(--color-secondary) 15%, #000000);
+    --tinted-sec-100o: color-mix(in srgb, var(--color-secondary) var(--tint-100o), #000000);
+    --tinted-sec-200o: color-mix(in srgb, var(--color-secondary) var(--tint-200o), #000000);
     --tinted-sec-300o: color-mix(in srgb, var(--color-secondary) 17%, #000000);
     --bd-filter: blur(5px) contrast(200%);
     --border-100: 2px solid var(--tinted-sec-100);
 
-    --bg-straight: linear-gradient(90deg, 
+    --bg-straight: linear-gradient(90deg in srgb,
                 color-mix(in oklch, var(--color-primary) 6%, #0000), 
                 color-mix(in oklch, var(--color-primary) 4%, #0000), 
                 /* color-mix(in oklch, var(--color-secondary) 4%, #0000),  */
                 color-mix(in oklch, var(--color-secondary) 4%, #0000),
                 color-mix(in oklch, var(--color-secondary) 6%, #0000));
-    --bg-100: linear-gradient(105deg, 
+    --bg-100: linear-gradient(105deg in srgb,
                 color-mix(in oklch, var(--color-primary) 20%, #0000), 
                 color-mix(in oklch, var(--color-primary) 8%, #0000), 
                 /* color-mix(in oklch, var(--color-primary) 8%, #0000),  */
                 color-mix(in oklch, var(--color-secondary) 8%, #0000),
                 color-mix(in oklch, var(--color-secondary) 20%, #0000));
-    --bg-200: linear-gradient(105deg, 
+    --bg-200: linear-gradient(105deg in srgb,
                 color-mix(in oklch, var(--color-primary) 30%, #0000), 
                 color-mix(in oklch, var(--color-primary) 10%, #0000), 
                 /* color-mix(in oklch, var(--color-primary) 10%, #0000),  */
@@ -63,7 +78,7 @@
     --box-shadow: 0 0 6px;
 
     --skeleton-bg: linear-gradient(
-        110deg,
+        110deg in lab,
         transparent 0%,
         transparent 40%,
         color-mix(in srgb, var(--color-primary) 6%, #0000) 45%,
@@ -73,8 +88,6 @@
         transparent 60%,
         transparent 100%
     );
-    --titlebar-size: 0px;
-    --vh: calc(100vh - var(--titlebar-size));
 }
 
 .vh {
@@ -99,7 +112,34 @@ input:-webkit-autofill:focus {
   animation-duration: 0s;
 }
 
+h2 {
+    font-weight: 600;
+    font-size: var(--text-xl);
+}
+
+.dark-picker {
+    --cp-bg-color: #AAA1;
+    --cp-border-color: #AAA2;
+    --cp-text-color: var(--color-base-content);
+    --cp-input-color: #9991;
+    --cp-button-hover-color: #AAA2;
+    /* border: 2px solid #AAAAAA0C; */
+    /* background-color: var(--tinted-sec-200o); */
+}
+.input-container > *:focus-visible {
+    border: 2px solid #AAAAAA0C !important;
+    outline: 0 !important;
+    background-color: var(--cp-button-hover-color);
+    
+}
+
+.truncate {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .card-base {
+    
     border: 2px solid #AAAAAA0F;
     background-origin: border-box;
     /* box-shadow: 0 0 12px #000; */
@@ -125,7 +165,7 @@ input:-webkit-autofill:focus {
 
 .card-200 {
     border: 2px solid #AAAAAA0C;
-    background-color: color-mix(in srgb, var(--color-secondary) 15%, #000000);
+    background-color: var(--tinted-sec-200o);
 }
 
 .card-200-shadow {

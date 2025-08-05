@@ -30,7 +30,7 @@
     inset: 0;
     display: block;
     background: linear-gradient(
-        120deg,
+        120deg in oklch,
         transparent 0%,
         transparent 10%,
         color-mix(in srgb, var(--color-primary) 20%, #0000) 40%,

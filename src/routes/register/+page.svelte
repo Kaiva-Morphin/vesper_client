@@ -195,7 +195,7 @@
         <button class="btn btn-border btn-primary" onclick={sendPressed}><Icon icon="mingcute:mail-send-line" height="22px" class="-ml-2"/> Send</button>
         <BorderInput id="email_code" bind:value={email_code} icon="mingcute:mail-open-line" autocomplete="one-time-code" placeholder="Email code" class="flex-grow"/>
       </div>
-      <div id="tos" class="flex items-center gap-2"><label class="cursor-pointer flex items-center gap-2"><BorderCheckbox bind:checked={tos_accepted} extra_class="checkbox-primary"/>I agree with</label> <a href="about/tos" class="link link-primary">terms of service</a></div>
+      <div id="tos" class="flex items-center gap-2"><label class="cursor-pointer flex items-center gap-2"><BorderCheckbox bind:checked={tos_accepted} class="checkbox-primary"/>I agree with</label> <a href="about/tos" class="link link-primary">terms of service</a></div>
       <button class="btn btn-border btn-primary" onclick={registerPressed}><Icon icon="mingcute:user-add-2-line" height="22px" class="-ml-2"/>Register</button>
       <p class="text-center">If you are not new, you can <a href="login" class="link link-primary">Log in</a></p>
   </CenteredCard>
