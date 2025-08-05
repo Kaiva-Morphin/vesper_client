@@ -43,7 +43,7 @@ class CssStyleProperty<T> {
         if (this.data_key) {
             switch (this.typename) {
                 case "data_mark":
-                    // this.value as boolean ? el.setAttribute(this.data_key, "") : el.removeAttribute(this.data_key);
+                    this.value as boolean ? el.setAttribute(this.data_key, "") : el.removeAttribute(this.data_key);
                     break;
             }
         } else {
