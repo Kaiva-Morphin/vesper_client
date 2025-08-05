@@ -3,6 +3,10 @@ import { setAccess } from "$lib/token.svelte";
 import { DEVICE_FINGERPRINT } from "./fingerprint.svelte";
 
 
+export const STATE_TOKEN_KEY = "state_token";
+
+
+
 export async function requestRegisterCode(turnstile: string, email: string) : Promise<boolean> {
     try {
         const res = await fetch(`${PUBLIC_API_BASE}/api/auth/account/request_register_code`, {
@@ -137,7 +141,7 @@ export async function oauth_login(token: string ) : Promise<{access_token: strin
 
 export async function checkUid(uid: string): Promise<boolean | null> {
     try {
-        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/account/uid_check?user_uid=${uid}`);
+        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/account/uid_check?user_uid=${uid.toLocaleLowerCase()}`);
         if (!res.ok) return null;
         let j = await res.json();
         return j;

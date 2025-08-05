@@ -12,6 +12,7 @@
     newToast("No token provided!", "btn-error");
     goto('/login');
   }
+  sessionStorage.removeItem("temp_register_token");
 
   let username = $state("");
   let username_ok : null | boolean = $state(null);
@@ -156,7 +157,7 @@
       <BorderInput id="username" bind:value={username} autocomplete="username" icon="mingcute:user-3-line" placeholder="Username" ok_state={username_ok} err_hint={username_available == false ? "Username taken" : "Username must be 3–24 characters, letters/numbers/underscores only"}/>
       <BorderInput id="password" bind:value={password} autocomplete="new-password" icon="mingcute:key-2-line" password placeholder="Password" ok_state={password_ok} err_hint="Password must be 8–32 and contain only letters/numbers and -+=$#~@*;:.<>\/|!"/>
       <BorderInput id="repeat_password" bind:value={repeat_password} autocomplete="new-password" icon="mingcute:keyhole-line" password placeholder="Repeat password" ok_state={repeat_password_ok} err_hint="Passwords do not match!"/>
-      <div id="tos" class="flex items-center gap-2"><label class="cursor-pointer flex items-center gap-2"><BorderCheckbox bind:checked={tos_accepted} extra_class="checkbox-primary"/>I agree with</label> <a href="about/tos" class="link link-primary">terms of service</a></div>
+      <div id="tos" class="flex items-center gap-2"><label class="cursor-pointer flex items-center gap-2"><BorderCheckbox bind:checked={tos_accepted} class="checkbox-primary"/>I agree with</label> <a href="about/tos" class="link link-primary">terms of service</a></div>
       <button class="btn btn-border btn-primary" onclick={registerPressed}><Icon icon="mingcute:user-add-2-line" height="22px" class="-ml-2"/>Register</button>
   </CenteredCard>
 </div>

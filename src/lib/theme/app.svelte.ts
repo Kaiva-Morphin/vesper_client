@@ -21,18 +21,18 @@ const properties = {
   error: { typename: "RgbaColor", css_key: "--color-error", display_name: "Error color" },
   error_content: { typename: "RgbaColor", css_key: "--color-error-content", display_name: "Error content" },
   base_content: { typename: "RgbaColor", css_key: "--color-base-content", display_name: "Base content" },
-  tint_100: { typename: "percent", css_key: "--tint-100o", display_name: "Tint 100%" },
-  tint_200: { typename: "percent", css_key: "--tint-200o", display_name: "Tint 200%" },
-  radius_selector: { typename: "px", css_key: "--radius_selector", display_name: "Radius selector" },
-  radius_field: { typename: "px", css_key: "--radius_field", display_name: "Radius field" },
-  radius_box: { typename: "px", css_key: "--radius_box", display_name: "Radius box" },
+  tint_100: { typename: "percent", css_key: "--tint-100o", display_name: "Tint main" },
+  tint_200: { typename: "percent", css_key: "--tint-200o", display_name: "Tint nested" },
+  radius_selector: { typename: "px", css_key: "--radius-selector", display_name: "Radius selector" },
+  radius_field: { typename: "px", css_key: "--radius-field", display_name: "Radius field" },
+  radius_box: { typename: "px", css_key: "--radius-box", display_name: "Radius box" },
 } as const;
 
 type PropertiesMap = typeof properties;
 
 type PropertyKey = keyof PropertiesMap;
 
-type AppTheme = {
+export type AppTheme = {
   [K in PropertyKey]: CssStyleProperty<TypeMap[PropertiesMap[K]["typename"]]>;
 };
 
@@ -53,6 +53,8 @@ export const appThemeTypes = {
 } as const;
 
 
+
+
 const root = document.documentElement;
 let init_style = getComputedStyle(root);
 export let THEME : Writable<AppTheme> = writable(themeFromCss(root, init_style));
@@ -63,6 +65,8 @@ export function applyTheme(theme: AppTheme, el: HTMLElement) {
         theme[key as keyof AppTheme].apply(el);
     }
 }
+
+
 
 let theme_override : null | AppTheme = null;
 
@@ -77,6 +81,25 @@ export function clearAppTheme(el: HTMLElement){
         el.style.removeProperty(prop.css_key);
         if ('data_key' in prop) el.removeAttribute(prop.data_key);
     }
+}
+
+export function themeToStyle(theme: AppTheme) : string {
+    let style = "";
+    for (const key in theme) {
+        style += theme[key as keyof AppTheme].css_key + ":" + theme[key as keyof AppTheme].toCssString() + ";";
+    }
+    return style;
+}
+
+export function themeToData(theme: AppTheme) : Record<string, string> {
+    let data : Record<string, string> = {};
+    for (const key in theme) {
+        let d = (theme[key as keyof AppTheme].toDataValue());
+        if (d != null) {
+            data[key] = d;
+        }
+    }
+    return data
 }
 
 
@@ -98,6 +121,7 @@ export function setNonOverrideTheme(t: string | AppTheme) {
         setDataToElement(root, "data-neo", t.includes("simple") ? null : "true");
         let theme = themeFromCss(root, getComputedStyle(document.documentElement));
         THEME.set(theme);
+        applyTheme(theme, root);
         localStorage.setItem(CURRENT_THEME_KEY, serializeTheme(theme));
         return;
     } else {
@@ -122,6 +146,7 @@ export function init(theme?: string | null) {
     }
     THEME.subscribe((new_theme) => {
         applyTheme(new_theme, root);
+        localStorage.setItem(CURRENT_THEME_KEY, serializeTheme(new_theme));
     })
 }
 

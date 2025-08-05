@@ -4,6 +4,7 @@
         icon = null,
         class:classExtra=null,
         collapsed_opacity=null,
+        onclick = (e: MouseEvent) : void => {}
     } = $props();
 
 </script>
@@ -11,6 +12,7 @@
 <button
     class="btn {classExtra} flex overflow-clip p-0 gap-0 {collapsed_opacity?"collapsable":""}"
     style="--op:{collapsed_opacity}"
+    onclick={(e) => {onclick(e)}}
 >
     {#if icon}
     <Icon icon={icon} height=24px class="ml-[6px]"></Icon>

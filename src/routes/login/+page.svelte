@@ -8,7 +8,7 @@
   import Popup from "../../components/popup.svelte";
   import { setAccess } from "$lib/token.svelte";
   import { newToast } from "$lib/toast.svelte";
-  import { login, oauth_login } from "$lib/api/auth.svelte";
+  import { login, oauth_login, STATE_TOKEN_KEY } from "$lib/api/auth.svelte";
   import { shakeById } from "$lib/util.svelte";
   import { PUBLIC_API_BASE } from "$env/static/public";
   import { goto } from "$app/navigation";
@@ -47,7 +47,7 @@
     }
     let register_token = event.data?.register;
     if (register_token) {
-      newToast(register_token, 'btn-error');
+      newToast("Finish registration", "btn-success");
       sessionStorage.setItem("temp_register_token", register_token);
       goto("/register/oauth");
       return
@@ -70,13 +70,13 @@
 
   function loginWithGoogle() {
     const state = crypto.randomUUID();
-    localStorage.setItem('state', state);
+    localStorage.setItem(STATE_TOKEN_KEY, state);
     window.open(`/api/auth/google?state=${state}`, "_blank", "popup,width=600,height=500");
   }
 
   function loginWithDiscord() {
     const state = crypto.randomUUID();
-    localStorage.setItem('state', state);
+    localStorage.setItem(STATE_TOKEN_KEY, state);
     window.open(`/api/auth/discord?state=${state}`, "_blank", "popup,width=600,height=500");
   }
 </script>

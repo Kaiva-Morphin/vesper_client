@@ -8,6 +8,10 @@
     /* transition-duration: 0.25s; */
 
 
+    --radius-field: 6px;
+    --radius-selector: 12px;
+    --radius-box: 6px;
+
     --titlebar-size: 0px;
     --vh: calc(100vh - var(--titlebar-size));
 
@@ -190,8 +194,7 @@ html {
     overflow-x: hidden;
     overflow-y: hidden;
 }
-
-[data-neo] .btn-border {
+:where([style*="--neo: 1"]) .btn-border {
     --col: var(--btn-color);
     --col-bg: var(--btn-bg);
     margin:  var(--border) var(--border);
@@ -214,7 +217,8 @@ html {
     }
 }
 
-[data-neo] .btn-border:hover, .btn-border:focus-visible {
+
+:where([style*="--neo: 1"]) .btn-border:hover, .btn-border:focus-visible {
     outline-offset: var(--border);
     outline-color: var(--col);
     background-color: var(--col);
@@ -222,18 +226,21 @@ html {
     color: var(--btn-fg);
 }
 
-.btn {
-    translate: unset !important;
-}
-
-[data-neo] .btn-border:active {
+:where([style*="--neo: 1"]) .btn-border:active {
     outline-color: var(--col-bg);
     color: var(--col-bg);
     transform: scale(0.97);
     outline-offset: -2px;
     background: 0;
-    /* background-color: color-mix(in srgb, var(--col-bg), #000, 10%); */
 }
+
+
+
+.btn {
+    translate: unset !important;
+}
+
+
 
 
 .unselectable {
@@ -426,4 +433,11 @@ html {
         /* --angle: 130deg; */
         --off: 0%;
     }
+}
+
+.marker {
+    background: red;
+}
+[data-neo="true"] .marker {
+    background: green;
 }

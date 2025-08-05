@@ -22,7 +22,7 @@
 
   let username_timer : null | number = null;
   let check_delay = 200;
-  let lazy_check_delay = 5000;
+  let lazy_check_delay = 1000;
 
 
   

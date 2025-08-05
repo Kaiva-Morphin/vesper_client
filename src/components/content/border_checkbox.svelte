@@ -4,7 +4,7 @@
 <input bind:checked={checked} type="checkbox" class={`checkbox checkbox-border ${extra_class}`} />
 <style>
 :global{
-[data-neo] .checkbox-border {
+[data-neo="true"] .checkbox-border {
   border: none;
   --col: var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, #0000));
   outline-color: var(--col);
@@ -18,26 +18,26 @@
   outline-offset: 0px;  
   border-radius: var(--radius-field);
 }
-[data-neo] .checkbox-border:hover, [data-neo] .checkbox-border:focus-visible {
+[data-neo="true"] .checkbox-border:hover, [data-neo="true"] .checkbox-border:focus-visible {
   outline-offset: var(--border);
   background-color: var(--col);
 }
-[data-neo] .checkbox-border:active {
+[data-neo="true"] .checkbox-border:active {
   outline-offset: -2px;
   scale: 0.97;
   outline-color: var(--col);
   background-color: var(--col);
 }
-[data-neo] .checkbox {
+[data-neo="true"] .checkbox {
   background-color: transparent;
 }
-[data-neo] .checkbox::before {
+[data-neo="true"] .checkbox::before {
   background-color: var(--tinted-sec-100o);
 }
-[data-neo] .checkbox:checked::before {
+[data-neo="true"] .checkbox:checked::before {
   background-color: var(--col);
 }
-[data-neo] .checkbox:checked:hover::before, [data-neo] .checkbox-border:focus-visible::before, [data-neo] .checkbox:checked:active::before {
+[data-neo="true"] .checkbox:checked:hover::before, [data-neo="true"] .checkbox-border:focus-visible::before, [data-neo="true"] .checkbox:checked:active::before {
   background-color: var(--tinted-sec-100o);
 }
 }

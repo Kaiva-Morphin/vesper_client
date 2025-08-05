@@ -37,7 +37,7 @@ export class CssStyleProperty<T> {
         if (this.data_key) {
             switch (this.typename) {
                 case "data_boolean":
-                    this.value as boolean ? el.setAttribute(this.data_key, "") : el.removeAttribute(this.data_key);
+                    this.value as boolean ? el.setAttribute(this.data_key, "true") : el.setAttribute(this.data_key, "false");
                     break;
             }
         } else {
@@ -58,9 +58,13 @@ export class CssStyleProperty<T> {
         case "string":
             return this.value as unknown as string;
         default:
-            console.error("[CssStyleProperty] Unknown type: " + this.typename + " for key: " + this.key);
             return "";
         }
+    }
+    
+    toDataValue() : string | null {
+        if (!this.data_key) return null;
+        return this.value as unknown as string
     }
 
     static fromCssValue<T>(

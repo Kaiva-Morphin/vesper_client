@@ -1,3 +1,5 @@
+import { writable, type Writable } from "svelte/store";
+
 export function oklchToRGB(oklch: string): {r: number, g: number, b: number} {
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = 1;
@@ -63,4 +65,16 @@ export function formatTimestamp(ms: number) {
         minute: '2-digit',
         hour12: false,
     }).format(ms).replace(',', ' at');
+}
+
+
+export function localState<T>(key: string, defaultValue: T): Writable<T> {
+    const stored = localStorage.getItem(key);
+    let w = writable(stored ? JSON.parse(stored) : defaultValue);
+    w.subscribe(value => localStorage.setItem(key, JSON.stringify(value)));
+    return w;
+}
+
+export const prettify = (t: String) => {
+    return t.replaceAll("_", " ").split(" ").map((s) => s[0].toUpperCase() + s.slice(1)).join(" "); 
 }

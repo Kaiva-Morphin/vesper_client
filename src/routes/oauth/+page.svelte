@@ -1,10 +1,14 @@
 <script lang="ts">
     import { page } from '$app/state';
+    import { STATE_TOKEN_KEY } from '$lib/api/auth.svelte';
     const params = new URLSearchParams(window.location.search);
     const channel = new BroadcastChannel('oauth_channel');
-    const receivedState = params.get('state');
-    const expectedState = localStorage.getItem('state');
-    localStorage.removeItem('state');
+    const receivedState = params.get("state");
+    const expectedState = localStorage.getItem(STATE_TOKEN_KEY);
+
+    console.error(receivedState, expectedState);
+
+    localStorage.removeItem(STATE_TOKEN_KEY);
     let err = page.url.searchParams.get("err");
     if (err) {
         channel.postMessage({
@@ -13,7 +17,7 @@
     } else {
         if (receivedState !== expectedState) {
             channel.postMessage({
-                err: "Tokens doesn't match"
+                err: `Tokens doesn't match`
             });
         } else {
             let login_token = page.url.searchParams.get("login");

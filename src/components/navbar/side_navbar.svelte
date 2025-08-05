@@ -6,7 +6,7 @@
 
 
 <style>
-    :global([data-neo]) .vertical_navbar {
+    :global([data-neo="true"]) .vertical_navbar {
         gap: calc(2 * var(--border));
     }
 </style>
