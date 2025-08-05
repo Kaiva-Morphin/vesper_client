@@ -57,6 +57,8 @@ export class CssStyleProperty<T> {
             return (this.value as unknown as number).toString();
         case "string":
             return this.value as unknown as string;
+        case "boolean_number":
+            return this.value as unknown as boolean ? "1" : "0";
         default:
             return "";
         }
@@ -95,6 +97,9 @@ export class CssStyleProperty<T> {
                 break;
             case "data_boolean":
                 value = cssValue;
+                break;
+            case "boolean_number":
+                value = cssValue == "1";
                 break;
             default:
                 value = cssValue;
@@ -169,6 +174,7 @@ export type TypeMap = {
   string: string;
   percent: number;
   px: number;
+  boolean_number: boolean;
   data_boolean: boolean;
 };
 

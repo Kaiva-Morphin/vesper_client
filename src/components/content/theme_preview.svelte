@@ -4,19 +4,21 @@
   import Button from "./button.svelte";
     let {
         theme,
-        onclick
+        onclick,
+        neo_override,
     } : {
+        neo_override?: boolean,
         onclick?: (e: MouseEvent) => void,
         theme : string | {theme: AppTheme, name: string},
     }= $props();
     let data = typeof theme == "string" ? {} : themeToData(theme.theme);
     let data_neo = data["neo"];
-    let neo = typeof theme == "string" ? !theme.includes("simple") : data_neo ? data_neo : "true";
+    let neo = 
+    neo_override != null ? neo_override :
+    typeof theme == "string" ? !theme.includes("simple") : data_neo ? data_neo : "true";
     let theme_data = typeof theme == "string" ? theme : theme.theme;
     let theme_name = typeof theme == "string" ? prettify(theme) : theme.name;
     let style = typeof theme == "string" ? "" : themeToStyle(theme.theme);
-    
-    console.log(style)
 </script>
 
 
@@ -31,7 +33,6 @@
         {theme_name}
         <slot></slot>
     </div>
-    <div class="marker w-15 h-15">inner</div>
     <div class="grid grid-cols-3 w-fit h-full ">
         <div data-tip="primary" class="rounded-full h-8 w-8 tooltip bg-[var(--color-primary)]"></div>
         <div data-tip="secondary" class="rounded-full h-8 w-8 tooltip bg-[var(--color-secondary)]"></div>

@@ -72,25 +72,12 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
         <CollapseSetting icon="mingcute:paint-brush-ai-line" open>
             <!-- TODO: ACTIVE STYLE -->
             <div slot="title">Theme</div>
-            <div slot="content" class="dark-picker h-200 flex flex-col gap-2 bg-[var(--tinted-sec-200o)]">
-                <LabelSeparator><h2>Default presets</h2></LabelSeparator>
-                <div class="grid grid-cols-4 gap-2">
-                    {#each default_themes as t}
-                        <ThemePreview 
-                        theme={t}
-                        onclick={() => {theme_name = prettify(t); setDefaultTheme(t)}}
-                        >
-                            <Button icon="tabler:trash-bin" class="btn-border btn-primary w-full pr-1">Button</Button>
-                            <div class="marker w-15 h-15 btn-border">outer</div>
-
-                        </ThemePreview>
-                    {/each}
-                </div>  
-
+            <div slot="content" class="dark-picker h-fit flex flex-col gap-2 bg-[var(--tinted-sec-200o)]">
+                
 
                 <LabelSeparator><h2>Customize</h2></LabelSeparator>
                 <div class="flex flex-row p-2 card-base card-100 card-100-border">
-                    <div class="grid grid-rows-4 w-full h-full gap-2 grid-flow-col">
+                    <div class="grid grid-rows-4 w-full h-full gap-2 grid-flow-col no-alpha">
                         {#each appThemeTypes.RgbaColor as t}
                             <ColorPicker
                                 label={$THEME[t].display_name}
@@ -128,6 +115,30 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                         </ThemePreview>
                     {/each}
                 </div>  
+                <LabelSeparator><h2>Default presets</h2></LabelSeparator>
+                <div class="grid grid-cols-4 gap-2">
+                    {#each default_themes as t}
+                        <ThemePreview 
+                        theme={t}
+                        neo_override={false}
+                        onclick={() => {theme_name = prettify(t); setDefaultTheme(t)}}
+                        >
+                            <Button icon="tabler:trash-bin" class="btn-border btn-primary w-full pr-1">Button</Button>
+                            <Button icon="tabler:trash-bin" class="btn btn-primary w-full pr-1">Button</Button>
+                        </ThemePreview>
+                    {/each}
+                    {#each default_themes as t}
+                        <ThemePreview 
+                        neo_override={true}
+                        theme={t}
+                        onclick={() => {theme_name = prettify(t); setDefaultTheme(t)}}
+                        >
+                            <Button icon="tabler:trash-bin" class="btn-border btn-primary w-full pr-1">Button</Button>
+                            <Button icon="tabler:trash-bin" class="btn btn-primary w-full pr-1">Button</Button>
+                        </ThemePreview>
+                    {/each}
+                </div>  
+
             </div>
         </CollapseSetting>
         <CollapseSetting icon="tabler:photo">

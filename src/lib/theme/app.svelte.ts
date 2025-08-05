@@ -9,7 +9,7 @@ export const CURRENT_THEME_KEY = "current_app_theme";
 const properties = {
   neo: { typename: "data_boolean", css_key: "data-neo", display_name: "Neo theme", data_key: "data-neo" },
   primary: { typename: "RgbaColor", css_key: "--color-primary", display_name: "Primary color" },
-  primary_content: { typename: "RgbaColor", css_key: "--color-primary-content", display_name: "Primary content" },
+  primary_content: { typename: "RgbaColor", css_key: "--color-primary-content", display_name: "Primary content", data_key: "" },
   secondary: { typename: "RgbaColor", css_key: "--color-secondary", display_name: "Secondary color" },
   secondary_content: { typename: "RgbaColor", css_key: "--color-secondary-content", display_name: "Secondary content" },
   accent: { typename: "RgbaColor", css_key: "--color-accent", display_name: "Accent color" },
@@ -79,7 +79,7 @@ export function clearAppTheme(el: HTMLElement){
     for (const key in properties) {
         const prop = properties[key as PropertyKey];
         el.style.removeProperty(prop.css_key);
-        if ('data_key' in prop) el.removeAttribute(prop.data_key);
+        if ('data_key' in prop && prop.data_key != "") el.removeAttribute(prop.data_key);
     }
 }
 
@@ -118,7 +118,8 @@ export function setNonOverrideTheme(t: string | AppTheme) {
     if (typeof t === "string") {
         clearAppTheme(root);
         setDataToElement(root, "data-theme", t);
-        setDataToElement(root, "data-neo", t.includes("simple") ? null : "true");
+        setDataToElement(root, "data-neo", (!t.includes("simple")) ? "true" : "false");
+        // root.style.setProperty("--neo", t.includes("simple") ? "0" : "1");
         let theme = themeFromCss(root, getComputedStyle(document.documentElement));
         THEME.set(theme);
         applyTheme(theme, root);
@@ -155,7 +156,7 @@ function themeFromCss(el: HTMLElement, styles: CSSStyleDeclaration): AppTheme {
     for (const key in properties) {
         const prop = properties[key as PropertyKey];
         const cssValue = styles.getPropertyValue(prop.css_key).trim();
-        if ('data_key' in prop) {
+        if ('data_key' in prop && prop.data_key != "") {
             let data = el.getAttribute(prop.data_key);
             result[key] = CssStyleProperty.fromDataValue(key, prop.css_key, prop.display_name, prop.typename, prop.data_key, data);
         } else {
