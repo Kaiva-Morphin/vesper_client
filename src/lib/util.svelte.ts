@@ -78,3 +78,7 @@ export function localState<T>(key: string, defaultValue: T): Writable<T> {
 export const prettify = (t: String) => {
     return t.replaceAll("_", " ").split(" ").map((s) => s[0].toUpperCase() + s.slice(1)).join(" "); 
 }
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

@@ -2,7 +2,7 @@
     import { localState } from "$lib/util.svelte";
     import { writable } from "svelte/store";
     import NavbarItem from "./item.svelte";
-    import { Svroller } from "svrollbar";
+    import { Svrollbar, Svroller } from "svrollbar";
     // todo!
     let show_on_hover = writable(false) //localState("sidebar_show_collapsed_on_hover", false);
     let states = [0, 48, 200];
@@ -50,7 +50,8 @@
 		window.addEventListener('mousemove', resize);
 		window.addEventListener('mouseup', stop);
 	}
-
+    let viewport
+    let contents
 </script>
 
 <!-- svelte-ignore css_unused_selector -->
@@ -99,6 +100,8 @@
         /* box-shadow: var(--box-shadow); */
         /* box-shadow: -4px 0 4px color-mix(in srgb, var(--color-secondary) 10%, #0000); */
 		box-sizing: border-box;
+        flex: -1 -1 auto;
+
         /* translate: var(--t) 0px; */
 	}
     .resizer_handle {
@@ -121,13 +124,39 @@
         translate: 0px 0px;
         box-shadow: inset -2px 0px 3px -1px color-mix(in srgb, var(--color-secondary) 50%, #0000);
     }
-    .fa {
-        flex: 1 0 auto;
+    :global {
+        
+        .mirror_alloc_provider {
+            --alloc: var(--alloc-outer);
+            background: var(--a);
+        }
+        .sidebar_mirror_alloc {
+            max-width: var(--alloc);
+            flex: 1 0 auto;
+        }
     }
 
+    .wrapper {
+        position: relative;
+    }
+
+    .viewport {
+        position: relative;
+        overflow: scroll;
+        box-sizing: border-box;
+
+        /* hide scrollbar */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .viewport::-webkit-scrollbar {
+        /* hide scrollbar */
+        display: none;
+    }
 </style>
 
-<div class="w-full vh">
+<div class="w-full max-vh">
     <!-- {#if $flex_basis > 0} -->
 
     <!-- --t: {$flex_basis == 0 || $show_on_hover ? "-10" : "0"}px; -->
@@ -152,20 +181,30 @@
         <NavbarItem link="/about" icon="mingcute:information-line">About</NavbarItem>
     </div>
 
-    <Svroller width="" height="">
-        <div class="flex flex-row overflow-x-clip -z-100 vh">
-            {#if target_width > 0}
-                <div class="h-screen w-[30px]" style="flex-basis: {alloc}px">
-                </div>  
-            {/if}
 
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div class="resizer" onmousedown={handleMouseDown}>
-                <div class="resizer_handle {target_width == 0 ? "visible_handle":""}"></div>
+
+
+    <div class="wrapper  flex-grow">
+        <div bind:this={viewport} class="viewport  w-full">
+            <div bind:this={contents} class="contents ">
+    <!-- <Svroller width="" height="fit"> -->
+            <div style="--alloc-outer: {alloc}px" class="flex flex-row overflow-x-clip -z-100 vh mirror_alloc_provider" >
+                {#if target_width > 0}
+                    <div class="max-vh w-[30px]" style="flex-basis: {alloc}px">
+                    </div>  
+                {/if}
+
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <div class="resizer" onmousedown={handleMouseDown}>
+                    <div class="resizer_handle {target_width == 0 ? "visible_handle":""}"></div>
+                </div>
+                <slot />
+
             </div>
-            <slot/>
-            <div class="fa" style="max-width: {alloc}px"></div>
+    <!-- </Svroller> -->
+            </div>
         </div>
-    </Svroller>
+    <Svrollbar {viewport} {contents} />
+    </div>
 </div> 
 

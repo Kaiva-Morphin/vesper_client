@@ -16,22 +16,14 @@
     const media_limit = 0.25;
     export const MEDIA_RULE = localState("media_rule_setting", "none");
     
-    // theme_name: "eyJuZW8iOnRydWUsInByaW1hcnkiOnsiciI6MTg5LCJnIjoyNTUsImIiOjB9LCJwcmltYXJ5X2NvbnRlbnQiOnsiciI6NjUsImciOjExOCwiYiI6MH0sInNlY29uZGFyeSI6eyJyIjoyMDYsImciOjE5MCwiYiI6MjQ0fSwic2Vjb25kYXJ5X2NvbnRlbnQiOnsiciI6ODYsImciOjcxLCJiIjoxMTd9LCJhY2NlbnQiOnsiciI6ODAsImciOjgwLCJiIjo4MH0sImFjY2VudF9jb250ZW50Ijp7InIiOjI0OCwiZyI6MjQ4LCJiIjoyNDh9LCJpbmZvIjp7InIiOjAsImciOjE4NiwiYiI6MjU0fSwiaW5mb19jb250ZW50Ijp7InIiOjQsImciOjQ2LCJiIjo3M30sInN1Y2Nlc3MiOnsiciI6MSwiZyI6MjIzLCJiIjoxMTR9LCJzdWNjZXNzX2NvbnRlbnQiOnsiciI6MiwiZyI6NDUsImIiOjIwfSwiZXJyb3IiOnsiciI6MjQwLCJnIjo3OCwiYiI6Nzl9LCJlcnJvcl9jb250ZW50Ijp7InIiOjEwNSwiZyI6MCwiYiI6MH0sImJhc2VfY29udGVudCI6eyJyIjoyNTUsImciOjIxNCwiYiI6MTY3fSwidGludF8xMDAiOjEyLCJ0aW50XzIwMCI6MTUsInJhZGl1c19zZWxlY3RvciI6MTIsInJhZGl1c19maWVsZCI6NiwicmFkaXVzX2JveCI6Nn0="
     let themes : Writable<Record<string, string>> = localState("saved_themes", {});
     
-    function themeToDataAttrs(theme: AppTheme) {
-        return Object.entries(theme)
-        .map(([key, value]) => `data-${key}="${value}"`)
-        .join(" ");
-    }
-
     let parsed_themes : Record<string, AppTheme> = $state({});
 
 
     for (let [key, serialized] of Object.entries($themes)) {
         let theme = deserializeTheme(serialized);
         parsed_themes[key] = theme;
-        // parsed_themes[key] = {theme, html : computeThemeHtml(theme)};
     }
 
 
@@ -69,12 +61,19 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
 
 <div class="w-full flex justify-center relative">
     <div class="w-full flex flex-col h-fit max-w-[900px] p-2 card-base card-100 card-100-border gap-2">
+        <CollapseSetting icon="mingcute:user-3-line">
+            <div slot="title">Account</div>
+            <div slot="content">
+                
+            </div>
+        </CollapseSetting>
+
+
+
         <CollapseSetting icon="mingcute:paint-brush-ai-line" open>
             <!-- TODO: ACTIVE STYLE -->
             <div slot="title">Theme</div>
             <div slot="content" class="dark-picker h-fit flex flex-col gap-2 bg-[var(--tinted-sec-200o)]">
-                
-
                 <LabelSeparator><h2>Customize</h2></LabelSeparator>
                 <div class="flex flex-row p-2 card-base card-100 card-100-border">
                     <div class="grid grid-rows-4 w-full h-full gap-2 grid-flow-col no-alpha">
@@ -107,11 +106,11 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                 </div>
                 <LabelSeparator><h2>Your themes</h2></LabelSeparator>
                 <div class="grid grid-cols-4 gap-2">
-                    {#each Object.entries(parsed_themes) as [key, theme]}
+                    {#each Object.entries(parsed_themes) as [key, theme] (key)}
                         <ThemePreview theme={{theme: theme, name: key}}
                         onclick={()=> {setNonOverrideTheme(theme); theme_name = key;}}
                         >
-                            <Button icon="tabler:trash" class="btn btn-border btn-error w-full pr-1" onclick={(e : MouseEvent) => {e.preventDefault(); e.stopPropagation(); deleteTheme(key)}}></Button>
+                        <Button icon="tabler:trash" class="btn btn-border btn-error w-full pr-1" onclick={(e : MouseEvent) => {e.preventDefault(); e.stopPropagation(); deleteTheme(key)}}></Button>
                         </ThemePreview>
                     {/each}
                 </div>  
@@ -120,28 +119,16 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                     {#each default_themes as t}
                         <ThemePreview 
                         theme={t}
-                        neo_override={false}
                         onclick={() => {theme_name = prettify(t); setDefaultTheme(t)}}
                         >
-                            <Button icon="tabler:trash-bin" class="btn-border btn-primary w-full pr-1">Button</Button>
-                            <Button icon="tabler:trash-bin" class="btn btn-primary w-full pr-1">Button</Button>
-                        </ThemePreview>
-                    {/each}
-                    {#each default_themes as t}
-                        <ThemePreview 
-                        neo_override={true}
-                        theme={t}
-                        onclick={() => {theme_name = prettify(t); setDefaultTheme(t)}}
-                        >
-                            <Button icon="tabler:trash-bin" class="btn-border btn-primary w-full pr-1">Button</Button>
-                            <Button icon="tabler:trash-bin" class="btn btn-primary w-full pr-1">Button</Button>
+                            <!-- <Button icon="tabler:trash-bin" class="btn-border btn-primary w-full pr-1">Button</Button> -->
                         </ThemePreview>
                     {/each}
                 </div>  
 
             </div>
         </CollapseSetting>
-        <CollapseSetting icon="tabler:photo">
+        <!-- <CollapseSetting icon="tabler:photo">
             <div slot="title">Images</div>
             <div slot="content">
                 <select class="select" bind:value={$MEDIA_RULE}>
@@ -150,7 +137,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                     <option value="upload">[max 200MB] Upload to catbox (your media will be public) </option>
                 </select>
             </div>
-        </CollapseSetting>
+        </CollapseSetting> -->
     </div>
 </div>
 

@@ -108,6 +108,7 @@
 @plugin "daisyui/theme" {
     name: "retro";
     --border: 2px;
+    --color-base-content: #e2b294;
 }
 
 @plugin "daisyui/theme" {

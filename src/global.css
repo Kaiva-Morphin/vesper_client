@@ -100,6 +100,10 @@
     height: var(--vh);
 }
 
+.max-vh {
+    max-height: var(--vh);
+}
+
 
 input::-ms-reveal,
 input::-ms-clear {
@@ -201,7 +205,7 @@ html {
     overflow-y: hidden;
 }
 
-[data-neo] .btn-border {
+[data-neo="true"] .btn-border {
     --col: var(--btn-color);
     --col-bg: var(--btn-bg);
     margin:  var(--border) var(--border);
@@ -224,7 +228,7 @@ html {
     }
 }
 
-[data-neo] .btn-border:hover, .btn-border:focus-visible {
+[data-neo="true"] .btn-border:hover, .btn-border:focus-visible {
     outline-offset: var(--border);
     outline-color: var(--col);
     background-color: var(--col);
@@ -236,7 +240,7 @@ html {
     translate: unset !important;
 }
 
-[data-neo] .btn-border:active {
+[data-neo="true"] .btn-border:active {
     outline-color: var(--col-bg);
     color: var(--col-bg);
     transform: scale(0.97);

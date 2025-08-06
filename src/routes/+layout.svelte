@@ -27,11 +27,13 @@
   	import ScriptEntrypoint from "$lib/script_entrypoint.svelte";
 	import ToastContainer from "../components/toast/toast_container.svelte";
   	import LoadingScreen from "../components/loading_screen.svelte";
+  	import WindowProvider from '../components/window/provider.svelte';
 </script>
 {#if hideRootLayout}
 {@render children()}
 {:else}
 <ScriptEntrypoint/>
+<WindowProvider/>
 <Debug/>
 <!-- <BackgroundShaderNoise/> -->
 <LoadingScreen/>

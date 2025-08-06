@@ -140,6 +140,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px]">
         </div>
     </div>
 </div>
+<div class="sidebar_mirror_alloc"></div>
 
 <style>
     .card-100 {
