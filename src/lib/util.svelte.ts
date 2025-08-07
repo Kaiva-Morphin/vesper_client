@@ -82,3 +82,7 @@ export const prettify = (t: String) => {
 export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export function clamp(num: number, min: number, max: number) {
+    return Math.min(Math.max(num, min), max);
+}

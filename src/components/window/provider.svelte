@@ -1,6 +1,6 @@
 <script lang="ts">
     import { TITLEBAR_SIZE } from "$lib/consts.svelte";
-    import { sleep } from "$lib/util.svelte";
+    import { clamp, sleep } from "$lib/util.svelte";
     import { onDestroy } from "svelte";
     import { writable, type Writable } from "svelte/store";
     import Floating from "./floating.svelte";
@@ -20,6 +20,7 @@
     const normalize = (v: Vec2): Vec2 => {let l = length(v); return div(v, l)};
     const normalize_or_zero = (v: Vec2): Vec2 => {let l = length(v); return l == 0 ? vec2(0, 0) : div(v, l)};
     const move_towards = (a: number, b: number, speed: number): number => Math.min(Math.max(a, b), a + (b - a) * speed);
+    
     let half_screen = mul(vec2(window.innerWidth, (window.innerHeight - TITLEBAR_SIZE)), 0.5);
     
 
@@ -37,45 +38,54 @@
 
 
     type FloatingWindow = {
+        dbg: string,
         pos: Vec2,
         target: Vec2,
         velocity: Vec2,
         size: Vec2,
+        max_size: Vec2,
+        min_size: Vec2,
         grabbed: null | [TimedVec2, TimedVec2],
         drag_offset: Vec2,
         inactive_since: number,
-        anchor: Anchor,
         magnet: null | Magnet,
         pinned: boolean,
+        resizing: null | {
+            edge: number,
+            start_mouse: Vec2,
+            start_size: Vec2,
+            start_pos: Vec2,
+        }
     }
 
-    type Anchor = 'top-left' | 'top' | 'top-right' | 'left' | 'center' | 'right' | 'bottom-left' | 'bottom' | 'bottom-right';
-
-    const ANCHORS : Anchor[] = [
-        'top-left',
-        'top',
-        'top-right',
-        'left',
-        'center',
-        'right',
-        'bottom-left',
-        'bottom',
-        'bottom-right'
-    ]
-
+    const DefaultWindow = {
+        dbg: "",
+        pos: vec2(0, 0),
+        target: vec2(0, 0),
+        velocity: vec2(0, 0),
+        size: vec2(200, 150),
+        max_size: vec2(5000, 5000),
+        min_size: vec2(50, 50),
+        grabbed: null,
+        drag_offset: vec2(0, 0),
+        inactive_since: 0,
+        magnet: null,
+        pinned: false,
+        resizing: null
+    }
     let windows : Record<string, FloatingWindow> = $state({
-        "dev": {
-            pos: vec2(100, 100),
-            anchor: 'top-left',
-            target: vec2(100, 100),
-            velocity: vec2(0, 0),
+        dev: {
+            ...DefaultWindow,
             size: vec2(200, 150),
-            grabbed: null,
-            drag_offset: vec2(0, 0),
-            inactive_since: 0,
-            magnet: null,
-            pinned: false,
-        }
+            max_size: vec2(5000, 5000),
+            min_size: vec2(50, 50),
+        } as FloatingWindow,
+        dev2: {
+            ...DefaultWindow,
+            size: vec2(200, 150),
+            max_size: vec2(5000, 5000),
+            min_size: vec2(50, 50),
+        } as FloatingWindow
     });
     
     
@@ -175,7 +185,6 @@
         let is_resizing = now - latest_resize < LATEST_RESIZE_DT;
         for (var [id, w] of Object.entries(windows)) {
             let is_sleeping = Date.now() - w.inactive_since > SLEEP_DT;
-            
             if (is_sleeping && !is_resizing) { 
                 continue;
             }
@@ -191,7 +200,6 @@
             let is_bound_x_max = (v: number) : boolean => v > max_x;
             let is_bound_y_min = (v: number) : boolean => v < min_y;
             let is_bound_y_max = (v: number) : boolean => v > max_y;
-
 
             if (w.grabbed != null || w.pinned) {
                 
@@ -223,39 +231,32 @@
                     w.velocity.y = w.velocity.y - (w.velocity.y * dt * (w.magnet.y == 0 ? 3.0 : 15.0))
 
                     if (w.magnet.x == -1) {
-                        let target_x = w.pos.x - half_size.x - SCREEN_MARGIN + half_screen.x;
-                        w.velocity.x = w.velocity.x - ( target_x * dt * ARCHIMEDES_FORCE);
+                        w.target.x = min_x;
+                        let x_dt = w.pos.x - w.target.x;
+                        w.velocity.x = w.velocity.x - ( x_dt * dt * ARCHIMEDES_FORCE);
                     }
                     if (w.magnet.x == 1) {
-                        let target_x = w.pos.x + half_size.x + SCREEN_MARGIN - half_screen.x;
-                        w.velocity.x = w.velocity.x - ( target_x * dt * ARCHIMEDES_FORCE);
+                        w.target.x = max_x;
+                        let x_dt = w.pos.x - w.target.x;
+                        w.velocity.x = w.velocity.x - ( x_dt * dt * ARCHIMEDES_FORCE);
                     }
                     if (w.magnet.y == -1) {
-                        let target_y = w.pos.y - half_size.y - SCREEN_MARGIN + half_screen.y;
-                        w.velocity.y = w.velocity.y - ( target_y * dt * ARCHIMEDES_FORCE);
+                        w.target.y = min_y;
+                        let y_dt = w.pos.y - w.target.y;
+                        w.velocity.y = w.velocity.y - ( y_dt * dt * ARCHIMEDES_FORCE);
                     }
                     if (w.magnet.y == 1) {
-                        let target_y = w.pos.y + half_size.y + SCREEN_MARGIN - half_screen.y;
-                        w.velocity.y = w.velocity.y - ( target_y * dt * ARCHIMEDES_FORCE);
+                        w.target.y = max_y;
+                        let y_dt = w.pos.y - w.target.y;
+                        w.velocity.y = w.velocity.y - ( y_dt * dt * ARCHIMEDES_FORCE);
                     }
                 }
                 
             }
-            // console.log(w.pos.x - half_size.x - SCREEN_MARGIN)
-
-
-
             if (length_squared(w.velocity) < 0.001) {
                 w.velocity = vec2(0, 0);
             }
-
             w.pos = add(w.pos, mul(w.velocity, dt));
-
-            // broken since i made center anchor
-            let idx = 5;
-                // Math.max(0, Math.min(2, Math.floor(w.pos.x / (screen.x / 3.0)))) +
-                // Math.max(0, Math.min(2, Math.floor(w.pos.y / (screen.y / 3.0)))) * 3;
-            w.anchor = ANCHORS[idx];
             if (!is_zero(w.velocity) || w.grabbed != null) {
                 w.inactive_since = now;
             }
@@ -267,6 +268,85 @@
     }
     tick = requestAnimationFrame(tick_windows)
     onDestroy (() => cancelAnimationFrame(tick));
+
+
+    function handleResizeStart(e: MouseEvent, w: FloatingWindow, edge: number) {
+        e.stopPropagation();
+        e.preventDefault();
+        const p = e2pos(e);
+        w.resizing = {
+            edge,
+            start_mouse: p,
+            start_size: { ...w.size },
+            start_pos: { ...w.pos },
+        };
+        w.pinned = false;
+        w.grabbed = null;
+        w.velocity = vec2(0, 0);
+
+        const moveListener = (e: MouseEvent) => resizeMove(e, w);
+        const upListener = (e: MouseEvent) => {
+            resizeEnd(w);
+            window.removeEventListener("mousemove", moveListener);
+            window.removeEventListener("mouseup", upListener);
+        };
+
+		window.addEventListener("mousemove", moveListener);
+        window.addEventListener("mouseup", upListener);
+    }
+
+
+    function resizeMove(e: MouseEvent, w: FloatingWindow) {
+        const p = e2pos(e);
+        if (!w.resizing) return;
+        w.inactive_since = 0; // force sleep
+        const dx = p.x - w.resizing.start_mouse.x;
+        const dy = p.y - w.resizing.start_mouse.y;
+
+        const edge = w.resizing.edge;
+
+        if (edge >> 0 & 1) {
+            let target_width = w.resizing.start_size.x + dx;
+            let ofx = Math.max(0, w.resizing.start_pos.x + w.resizing.start_size.x * 0.5 + dx - half_screen.x + SCREEN_MARGIN);
+            target_width = clamp(target_width - ofx, w.min_size.x, w.max_size.x);
+            let delta = target_width - w.resizing.start_size.x;
+            w.size.x = target_width;
+            w.pos.x = w.resizing.start_pos.x + delta * 0.5;
+        }
+        if (edge >> 1 & 1) {
+            let new_width = w.resizing.start_size.x - dx;
+            let ofx = Math.max(0, w.resizing.start_size.x * 0.5 - w.resizing.start_pos.x - dx - half_screen.x + SCREEN_MARGIN);
+            new_width = clamp(new_width - ofx, w.min_size.x, w.max_size.x);
+            const delta = new_width - w.resizing.start_size.x;
+            w.size.x = new_width;
+            w.pos.x = w.resizing.start_pos.x - delta * 0.5;
+        }
+
+        if (edge >> 2 & 1) {
+            let new_height = w.resizing.start_size.y + dy;
+            let ofy = Math.max(0, w.resizing.start_pos.y + w.resizing.start_size.y * 0.5 + dy - half_screen.y + SCREEN_MARGIN);
+            new_height = clamp(new_height - ofy, w.min_size.x, w.max_size.x);
+            const delta = new_height - w.resizing.start_size.y;
+            w.size.y = new_height;
+            w.pos.y = w.resizing.start_pos.y + delta * 0.5;
+        }
+        if (edge >> 3 & 1) {
+            let new_height = w.resizing.start_size.y - dy;
+            let ofy = Math.max(0, w.resizing.start_size.y * 0.5 - w.resizing.start_pos.y - dy - half_screen.y + SCREEN_MARGIN);
+            new_height = clamp(new_height - ofy, w.min_size.y, w.max_size.y);
+            const delta = new_height - w.resizing.start_size.y;
+            w.size.y = new_height;
+            w.pos.y = w.resizing.start_pos.y - delta * 0.5;
+
+        }
+    }
+
+    function resizeEnd(w: FloatingWindow) {
+        w.resizing = null;
+        w.magnet = null;
+        w.inactive_since = Date.now();
+    }
+
 </script>
 
 
@@ -275,16 +355,17 @@
     {#each Object.entries(windows) as [id, w] (id)}
         <div 
             id="{FLOATING_PREFIX}{id}"
-            class="absolute shadow-lg pointer-events-auto cursor-pointer z-100 {w.pinned ? 'bg-[#F222]' : 'bg-[#FFF2]'} translate-x-[-50%] translate-y-[-50%]" 
+            class="absolute shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing z-100 bg-[#FFF2] translate-x-[-50%] translate-y-[-50%]" 
             style="top: calc(50% + {w.pos.y}px); left: calc(50% + {w.pos.x}px); width: {w.size.x}px; height: {w.size.y}px;" onmousedown={(e) => {handleMouseDown(e, w, id)}}>
-            <div class="absolute -top-2 -left-2 w-2 h-2 bg-green-200"></div>
-            <div class="absolute -top-2 -right-2 w-2 h-2 bg-green-200"></div>
-            <div class="absolute -bottom-2 -right-2 w-2 h-2 bg-green-200"></div>
-            <div class="absolute -bottom-2 -left-2 w-2 h-2 bg-green-200"></div>
-            <div class="absolute -top-2 w-full h-2 bg-green-500"></div>
-            <div class="absolute -bottom-2 w-full h-2 bg-green-500"> </div>
-            <div class="absolute -left-2 w-2 h-full bg-green-500"> </div>
-            <div class="absolute -right-2 w-2 h-full bg-green-500"> </div>
+
+            <div class="absolute -top-2 w-full h-2 cursor-n-resize" onmousedown={(e) => handleResizeStart(e, w, 0b1000)}></div>
+            <div class="absolute -bottom-2 w-full h-2 cursor-s-resize" onmousedown={(e) => handleResizeStart(e, w, 0b0100)}> </div>
+            <div class="absolute -left-2 h-full w-2 cursor-w-resize" onmousedown={(e) => handleResizeStart(e, w, 0b0010)}></div>
+            <div class="absolute -right-2 h-full w-2 cursor-e-resize" onmousedown={(e) => handleResizeStart(e, w, 0b0001)}></div>
+            <div class="absolute -bottom-2 -right-2 w-2 h-2 cursor-nwse-resize" onmousedown={(e) => handleResizeStart(e, w, 0b0101)}></div>
+            <div class="absolute -top-2 -right-2 w-2 h-2 cursor-nesw-resize" onmousedown={(e) => handleResizeStart(e, w, 0b1001)}></div>
+            <div class="absolute -bottom-2 -left-2 w-2 h-2 cursor-nesw-resize" onmousedown={(e) => handleResizeStart(e, w, 0b0110)}></div>
+            <div class="absolute -top-2 -left-2 w-2 h-2 cursor-nwse-resize" onmousedown={(e) => handleResizeStart(e, w, 0b1010)}></div>
         </div>
     {/each}
 </div>
