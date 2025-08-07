@@ -1,7 +1,6 @@
 <script lang="ts">
     import Icon from "@iconify/svelte";
     import CollapseSetting from "../../components/content/collapse_setting.svelte";
-
     import ColorPicker, { type RgbaColor } from 'svelte-awesome-color-picker';
     import { default_themes, appThemeTypes, setDefaultTheme, THEME, serializeTheme, deserializeTheme, setNonOverrideTheme, applyTheme, themeToData, themeToStyle, type AppTheme} from "$lib/theme/app.svelte";
     import { get, type Writable } from "svelte/store";
@@ -11,7 +10,9 @@
     import { updated } from "$app/state";
     import Button from "../../components/content/button.svelte";
     import { localState, prettify, shakeById } from "$lib/util.svelte";
-  import ThemePreview from "../../components/content/theme_preview.svelte";
+    import ThemePreview from "../../components/content/theme_preview.svelte";
+    import { DefaultWindow, openFloating, vec2, type FloatingWindow } from "$lib/window/floating.svelte";
+    import AppThemeEditor from "$lib/../components/window/app_theme_editor.svelte";
 
     const media_limit = 0.25;
     export const MEDIA_RULE = localState("media_rule_setting", "none");
@@ -25,8 +26,6 @@
         let theme = deserializeTheme(serialized);
         parsed_themes[key] = theme;
     }
-
-
 
     themes.subscribe(() => {
         for (let [key, serialized] of Object.entries($themes)) {
@@ -50,6 +49,19 @@
         delete $themes[name];
     }
 
+
+    function openPicker(){
+        openFloating({
+            ...DefaultWindow,
+            component: AppThemeEditor,
+            min_size: vec2(265, 200),
+            size: vec2(265, 200),
+            id: "theme_editor",
+            props: {
+                id: "theme_editor",
+            }
+        } as FloatingWindow);        
+    }
 </script>
 
 
@@ -64,7 +76,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
         <CollapseSetting icon="mingcute:user-3-line">
             <div slot="title">Account</div>
             <div slot="content">
-                
+
             </div>
         </CollapseSetting>
 
@@ -99,10 +111,11 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                     </div>
                 </div>
                 <div class="flex flex-row p-2 gap-2 w-full">
+                    <button onclick={async () => {let theme = deserializeTheme(await navigator.clipboard.readText());setNonOverrideTheme(theme)}} class="tooltip tooltip-right btn btn-border btn-primary hover:btn-error" data-tip="Paste from clipboard"><Icon height=24px icon="tabler:clipboard"/></button>
+                    <button onclick={() => {let theme = serializeTheme($THEME);navigator.clipboard.writeText(theme);}} class="tooltip btn btn-border btn-primary" data-tip="Copy to clipboard"><Icon height=24px icon="tabler:copy"/></button>
                     <BorderInput id="theme_name" placeholder="Theme name" icon="mingcute:palette-line" class="flex-grow input-primary" bind:value={theme_name}></BorderInput>
                     <Button icon="mingcute:save-2-line" class="btn btn-primary btn-border pr-2" onclick={saveTheme}>Save Theme</Button>
-                    <button onclick={() => {let theme = serializeTheme($THEME);navigator.clipboard.writeText(theme);}} class="tooltip btn btn-border btn-primary" data-tip="Copy to clipboard"><Icon height=24px icon="tabler:copy"/></button>
-                    <button onclick={async () => {let theme = deserializeTheme(await navigator.clipboard.readText());setNonOverrideTheme(theme)}} class="tooltip btn btn-border btn-primary hover:btn-error" data-tip="Paste from clipboard"><Icon height=24px icon="tabler:clipboard"/></button>
+                    <Button icon="mingcute:pin-line" class="btn btn-primary btn-border pr-2" onclick={openPicker}>Unpin picker</Button>
                 </div>
                 <LabelSeparator><h2>Your themes</h2></LabelSeparator>
                 <div class="grid grid-cols-4 gap-2">

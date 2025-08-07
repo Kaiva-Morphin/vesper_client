@@ -139,7 +139,7 @@
     .wrapper {
         position: relative;
     }
-
+:global {
     .viewport {
         position: relative;
         overflow: scroll;
@@ -154,6 +154,7 @@
         /* hide scrollbar */
         display: none;
     }
+}
 </style>
 
 <div class="w-full max-vh">
@@ -184,10 +185,9 @@
 
 
 
-    <div class="wrapper  flex-grow">
-        <div bind:this={viewport} class="viewport  w-full">
+    <div class="wrapper flex-grow">
+        <div bind:this={viewport} class="viewport w-full">
             <div bind:this={contents} class="contents ">
-    <!-- <Svroller width="" height="fit"> -->
             <div style="--alloc-outer: {alloc}px" class="flex flex-row overflow-x-clip -z-100 vh mirror_alloc_provider" >
                 {#if target_width > 0}
                     <div class="max-vh w-[30px]" style="flex-basis: {alloc}px">
@@ -201,10 +201,9 @@
                 <slot />
 
             </div>
-    <!-- </Svroller> -->
             </div>
         </div>
-    <Svrollbar {viewport} {contents} />
+        <Svrollbar {viewport} {contents} />
     </div>
 </div> 
 
