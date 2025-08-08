@@ -8,7 +8,7 @@ export var USER_UID : Writable<null | string> = writable(null);
 let refreshTimeout: number | null = null;
 
 export function setAccess(token: {access_token: string, exp: number} | null) {
-    if (token == null){ACCESS_TOKEN.set(null); return;}
+    if (token == null){USER_UID.set(null); ACCESS_TOKEN.set(null); return;}
     if (refreshTimeout) {
         clearTimeout(refreshTimeout);
         refreshTimeout = null;

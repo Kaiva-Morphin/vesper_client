@@ -3,6 +3,7 @@
   import Icon from "@iconify/svelte";
     import { get, type Writable } from "svelte/store";
     import { Svroller } from "svrollbar";
+  import Channel from "../../components/calls/channel.svelte";
 
     type Resizer = {
         max: number,
@@ -59,11 +60,12 @@
 <div class=" vh flex-grow flex">
     <div class="w-[128px] max-vh card-100 card-base card-100-border flex flex-col gap-2 p-2 {$calls_val == 0 ? 'hidden' : ''}" style="flex-basis:{$calls_val}px">
         <div class="w-full bg-[#0005] h-32 p-2 gap-2 flex">
-            <Icon class="min-w-[24px]" icon="tabler:volume" height=24px/>
+            <Icon class="min-w-[24px]" icon="flowbite:volume-up-solid" height=24px/>
+            <Icon class="min-w-[24px] p-[3px]" icon="fa:lock" height=24px/>
             <div class="text-ellipsis overflow-hidden">Ясосу</div>
-            <Icon class="min-w-[24px]" icon="tabler:volume" height=24px/>
             <!-- <div class="text-ellipsis flex-grow overflow-clip">VoiceAsdasdasdasdasdasd</div> -->
         </div>
+        <Channel></Channel>
     </div>
     <div class="relative h-full {$calls_val > 0 ? 'w-1' : ''}">
         <div class="z-10 absolute h-full resizer w-[12px] hover:bg-[#FFF2]" 

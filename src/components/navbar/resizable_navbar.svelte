@@ -3,6 +3,7 @@
     import { writable } from "svelte/store";
     import NavbarItem from "./item.svelte";
     import { Svrollbar, Svroller } from "svrollbar";
+  import { USER_UID } from "$lib/token.svelte";
     // todo!
     let show_on_hover = writable(false) //localState("sidebar_show_collapsed_on_hover", false);
     let states = [0, 48, 200];
@@ -168,19 +169,23 @@
     {target_width == 0 ? "display: none;" : ""}
     "
     >
-        <NavbarItem link="/" icon="mingcute:home-4-line">Home</NavbarItem>
-        <NavbarItem link="/u" icon="mingcute:user-search-line">Users</NavbarItem>
+    <NavbarItem link="/0playground" icon="mingcute:bug-line">0playground</NavbarItem>
+        <div class="flex-grow"></div>
+        {#if $USER_UID == null}
+        <NavbarItem link="/us" icon="mingcute:user-search-line">Users</NavbarItem>
         <NavbarItem link="/calls" icon="tabler:phone">Calls</NavbarItem>
-        <NavbarItem link="/social" icon="mingcute:group-3-line">Social</NavbarItem>
         <div class="flex-grow"></div>
-        <NavbarItem link="/0playground" icon="mingcute:bug-line">0playground</NavbarItem>
-        <NavbarItem link="/scroll" icon="mingcute:mouse-line">Scroll test</NavbarItem>
+        <NavbarItem link="/login" icon="mingcute:user-add-2-line">Login</NavbarItem>
+        {:else}
+        <NavbarItem link="/calls" icon="tabler:phone">Calls</NavbarItem>
+        <NavbarItem link="/us" icon="mingcute:user-search-line">Users</NavbarItem>
         <div class="flex-grow"></div>
-        <NavbarItem link="/u/test_user" icon="mingcute:user-3-line">User</NavbarItem>
-        <NavbarItem link="/register" icon="mingcute:user-add-2-line">Register</NavbarItem>
+        <NavbarItem link="/u/{$USER_UID}" icon="mingcute:user-3-line">Profile</NavbarItem>
+        {/if}
         <NavbarItem link="/settings" icon="mingcute:settings-1-line">Settings</NavbarItem>
         <NavbarItem link="/about" icon="mingcute:information-line">About</NavbarItem>
     </div>
+    
 
 
 

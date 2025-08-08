@@ -1,8 +1,5 @@
 <script lang="ts">
     import { FLOATING_CONTAINER_ID, FLOATING_PREFIX, handleMouseDown, handleResizeStart, WINDOWS } from "$lib/window/floating.svelte";
-
-    
-
 </script>
 
 
@@ -11,9 +8,8 @@
     {#each Object.entries($WINDOWS) as [id, w] (id)}
         <div 
             id="{FLOATING_PREFIX}{id}"
-            class="absolute shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing z-100 translate-x-[-50%] translate-y-[-50%]" 
-            style="top: calc(50% + {w.pos.y}px); left: calc(50% + {w.pos.x}px); width: {w.size.x}px; height: {w.size.y}px;">
-            
+            class="absolute shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing translate-x-[-50%] translate-y-[-50%]" 
+            style="top: calc(50% + {w.pos.y}px); left: calc(50% + {w.pos.x}px); width: {w.size.x}px; height: {w.size.y}px; z-index: {w.z_index};">
             <div class="z-[250] absolute -top-1 w-full h-2 cursor-n-resize" onmousedown={(e) => handleResizeStart(e, w, 0b1000)}></div>
             <div class="z-[250] absolute -bottom-1 w-full h-2 cursor-s-resize" onmousedown={(e) => handleResizeStart(e, w, 0b0100)}> </div>
             <div class="z-[250] absolute -left-1 h-full w-2 cursor-w-resize" onmousedown={(e) => handleResizeStart(e, w, 0b0010)}></div>

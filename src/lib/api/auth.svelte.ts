@@ -117,6 +117,19 @@ export async function login(turnstile: string, email: string, password: string )
     }
 }
 
+export async function logout() {
+    try {
+        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/session`, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            method: "DELETE",
+        });
+        setAccess(null);
+    } catch {
+    }
+}
+
 
 export async function oauth_login(token: string ) : Promise<{access_token: string, exp: number} | string> {
     try {

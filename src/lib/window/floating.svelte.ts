@@ -1,5 +1,5 @@
 import { TITLEBAR_SIZE } from "$lib/consts.svelte";
-import { clamp, shakeById } from "$lib/util.svelte";
+import { clamp, localState, shakeById } from "$lib/util.svelte";
 import type { SvelteComponent } from "svelte";
 import { get, writable, type Writable } from "svelte/store";
 
@@ -52,6 +52,7 @@ export type FloatingWindow = {
     target: Vec2,
     velocity: Vec2,
     size: Vec2,
+    z_index: number,
     max_size: Vec2,
     min_size: Vec2,
     grabbed: null | [TimedVec2, TimedVec2],
@@ -69,10 +70,10 @@ export type FloatingWindow = {
 
 export const DefaultWindow = {
     dbg: "",
+    z_index: 0,
     pos: vec2(0, 0),
     target: vec2(0, 0),
     velocity: vec2(0, 0),
-    size: vec2(200, 150),
     max_size: vec2(5000, 5000),
     min_size: vec2(50, 50),
     grabbed: null,
@@ -98,12 +99,22 @@ export const WINDOWS : Writable<Record<string, FloatingWindow>> = writable({
     // } as FloatingWindow
 });
 
-
-
+export function top_layer(caller: FloatingWindow) {
+    let current = caller.z_index;
+    WINDOWS.update((windows) => {
+        for (var [id, w] of Object.entries(windows)) {
+            let start = w.z_index;
+            if (w.z_index > current) w.z_index -= 1;
+            if (id == caller.id) w.z_index = Object.keys(windows).length - 1;
+        }
+        return windows;
+    });
+}
 
 export function handleMouseDown(e: MouseEvent, w: FloatingWindow, id: string) {
     w.pinned = false;
     w.inactive_since = Date.now();
+    top_layer(w);
     let p = e2pos(e);
     w.drag_offset = sub(p, w.pos);
     w.target = sub(p, w.drag_offset);
@@ -150,7 +161,7 @@ let latest_dt = Date.now();
 const wrapped_dt = () : number => {
     let dt = Date.now() - latest_dt;
     latest_dt = Date.now();
-    return Math.min(0.1, dt / 1000.0);
+    return Math.min(0.025, dt / 1000.0);
 }
 
 const SCREEN_MARGIN = 20;
@@ -196,7 +207,7 @@ async function tick_windows() {
 
     WINDOWS.update((windows) => {
         for (var [id, w] of Object.entries(windows)) {
-            let is_sleeping = Date.now() - w.inactive_since > SLEEP_DT;
+            let is_sleeping = now - w.inactive_since > SLEEP_DT;
             if (is_sleeping && !is_resizing) { 
                 continue;
             }
@@ -287,6 +298,7 @@ tick = requestAnimationFrame(tick_windows)
 export function handleResizeStart(e: MouseEvent, w: FloatingWindow, edge: number) {
     e.stopPropagation();
     e.preventDefault();
+    top_layer(w);
     const p = e2pos(e);
     w.resizing = {
         edge,
@@ -370,10 +382,12 @@ export function openFloating(entry: FloatingWindow) {
     // });
     // WINDOWS[entry.id] = entry;
     
+    
     WINDOWS.update((windows) => {
         if (windows[entry.id]) {
             shakeById(FLOATING_PREFIX + entry.id)
         } else {
+            entry.z_index = Object.keys(windows).length;
             windows[entry.id] = entry;
         }
         return windows;

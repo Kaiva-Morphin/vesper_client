@@ -4,7 +4,7 @@
   import { easeOutQuint } from '$lib/util.svelte';
 
 import { fade, fly, scale } from 'svelte/transition';
-let {on_deny} : {on_deny: (() => void)} = $props();
+let {on_deny, class : extra_class} : {on_deny: (() => void), class?: String} = $props();
 
 
 $effect(() => {

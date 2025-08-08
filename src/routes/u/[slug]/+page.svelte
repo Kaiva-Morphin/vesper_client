@@ -3,13 +3,14 @@
     import ProgressiveImage from "../../../components/content/progressive_image.svelte";
     import { PUBLIC_API_BASE } from "$env/static/public";
     import Button from "../../../components/content/button.svelte";
-  import { formatTimestamp, timeAgo } from "$lib/util.svelte";
+    import { formatTimestamp, timeAgo } from "$lib/util.svelte";
     let nickname = $state("Kaiv");
     let last_seen = Date.now();
     let online = $state(false);
     let last_seen_h = formatTimestamp(last_seen);
-
-    
+    import { page } from '$app/state';
+	
+    let id = page.params.slug;
 
     let last_seen_d = $state(timeAgo(last_seen - Date.now()));
 
@@ -22,6 +23,7 @@
     update();
 
     let is_friend : null | boolean = $state(null);
+
     
 </script>
 
@@ -118,27 +120,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px]">
         </div>
     </div>
 
-    <div>
-        <div class="mini-container card-base card-100 flex flex-col" >
-            <!-- style="--bi: url('http://localhost:2000/bg5.gif')" -->
-            <video autoplay loop muted playsinline class="mini-bg" poster="/placeholder.jpg">
-                <source src="http://localhost:2000/bg2.mp4" type="video/mp4" class="">
-            </video>
-            <div class="mini-header flex flex-row w-full gap-[28px]">
-                <img src="http://localhost:2000/avatar.jpg" class="mini-avatar" alt="">
-                <div class="flex flex-col h-full justify-center pt-[14px] flex-grow  overflow-y-visible">
-                    <div class="text-2xl pr-2 truncate font-bold">{nickname}</div>
-                    <div class="flex flex-row gap-1">
-                        <div  class="text-xs font-bold {!online?"tooltip tooltip-bottom tooltip-primary opacity-75":""}" data-tip="{last_seen_h}">{online?"Online":"Last seen " + last_seen_d}</div>
-                    </div>
-                </div>
-                <Icon class="absolute top-3 right-3 bg-[#0004] outline-4 outline-[#0004] rounded-full" height=20px icon="tabler:dots"/>
-                <Icon class="absolute top-3 right-11 bg-[#0004] outline-4 outline-[#0004] rounded-full" height=20px icon="mingcute:user-follow-2-line"/>
-            </div>
-            <div class="mini-content h-fit flex-grow">
-            </div>
-        </div>
-    </div>
+
 </div>
 <div class="sidebar_mirror_alloc"></div>
 
@@ -153,63 +135,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px]">
         text-shadow: none;
     }
 
-    .mini-header {
-        height: 96px;
-    }
-
-    .mini-avatar {
-        width: 96px;
-        height: 96px;
-        transform: translate(14px, 14px);
-        border-radius: 8px;
-    }
-
-    .mini-container {
-        background-color: var(--tinted-sec-100o);
-        position: fixed;
-        border-radius: var(--border-1);
-        overflow: clip;
-        bottom: 3rem;
-        right: 2rem;
-
-        min-height: 120px;
-
-        width: 340px;
-        height: fit-content;
-        border: 0;
-        box-shadow: 0px 1px 12px 1px black;
-    }
-    .mini-content {
-        background: #000A;
-        border-top: 1px solid #FFF3;
-    }
-
-    .mini-container::after {
-        content: "";
-        border-radius: var(--border-1);
-        position: absolute;
-        z-index: -10;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: var(--bi);
-        background-size: 100%;
-        background-repeat: no-repeat;
-        background-clip: 400px;
-        mask-image: linear-gradient(to bottom, black, black 400px, transparent 432px);
-    }
-    .mini-bg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background-image: var(--bi);
-        object-fit: contain;
-        object-position: 0px 0px;
-        z-index: -10;
-        mask-image: linear-gradient(to bottom, black, black 400px, transparent 432px);
-    }
+    
 
     .bg-video {
         position: absolute;
@@ -270,6 +196,9 @@ class="flex-grow flex justify-center relative vh min-w-[900px]">
 
     .main-container {
         backdrop-filter: blur(var(--blur));
+        padding-bottom: 40px;
+        mask-image: linear-gradient(to top, transparent, black 32px, black 100%);
+
     }
 
     .card-100 {
