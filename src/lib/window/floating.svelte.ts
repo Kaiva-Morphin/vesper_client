@@ -43,6 +43,7 @@ window.addEventListener('resize', () => {
 type TimedVec2 = {p: Vec2, t: number}
 
 
+
 export type FloatingWindow = {
     id: string;
     component: any;
@@ -53,20 +54,16 @@ export type FloatingWindow = {
     velocity: Vec2,
     size: Vec2,
     z_index: number,
+
     max_size: Vec2,
     min_size: Vec2,
-    grabbed: null | [TimedVec2, TimedVec2],
-    drag_offset: Vec2,
     inactive_since: number,
-    magnet: null | Magnet,
-    pinned: boolean,
-    resizing: null | {
-        edge: number,
-        start_mouse: Vec2,
-        start_size: Vec2,
-        start_pos: Vec2,
-    }
+    type: FloatingWindowType,
 }
+export type FloatingWindowType =
+    | { mode: 'floating', drag_offset: Vec2, pinned: boolean, magnet: Magnet | null, resizing: null | { edge: number, start_mouse: Vec2, start_size: Vec2, start_pos: Vec2 }, grabbed: null | [TimedVec2, TimedVec2] }
+    | { mode: 'fixed' }
+    | { mode: 'follow' };
 
 export const DefaultWindow = {
     dbg: "",
@@ -76,12 +73,16 @@ export const DefaultWindow = {
     velocity: vec2(0, 0),
     max_size: vec2(5000, 5000),
     min_size: vec2(50, 50),
-    grabbed: null,
-    drag_offset: vec2(0, 0),
     inactive_since: 0,
-    magnet: null,
-    pinned: false,
-    resizing: null
+
+    type: {
+        mode: 'floating',
+        drag_offset: vec2(0, 0),
+        magnet: null,
+        pinned: false,
+        resizing: null,
+        grabbed: null
+    } as FloatingWindowType
 }
 
 export const WINDOWS : Writable<Record<string, FloatingWindow>> = writable({
@@ -112,16 +113,17 @@ export function top_layer(caller: FloatingWindow) {
 }
 
 export function handleMouseDown(e: MouseEvent, w: FloatingWindow, id: string) {
-    w.pinned = false;
+    if (w.type.mode !== "floating") return;
     w.inactive_since = Date.now();
     top_layer(w);
     let p = e2pos(e);
-    w.drag_offset = sub(p, w.pos);
-    w.target = sub(p, w.drag_offset);
-    w.magnet = null;
+    w.type.pinned = false;
+    w.type.drag_offset = sub(p, w.pos);
+    w.target = sub(p, w.type.drag_offset);
+    w.type.magnet = null;
     const now = Date.now();
     let timed = { p: p, t: now };
-    w.grabbed = [timed, timed];
+    w.type.grabbed = [timed, timed];
     const moveListener = (e: MouseEvent) => handleMouseMove(e, w);
     const upListener = (e: MouseEvent) => {
         handleMouseUp(e, w);
@@ -132,26 +134,28 @@ export function handleMouseDown(e: MouseEvent, w: FloatingWindow, id: string) {
     window.addEventListener("mouseup", upListener);
 }
 function handleMouseMove(e: MouseEvent, w: FloatingWindow) {
-    if (w.grabbed) {
+    if (w.type.mode !== "floating") return;
+    if (w.type.grabbed) {
         let p = e2pos(e);
         const now = Date.now();
-        w.grabbed[1] = { ...w.grabbed[0] };
-        w.grabbed[0] = { p, t: now };
-        w.target = sub(p, w.drag_offset);
+        w.type.grabbed[1] = { ...w.type.grabbed[0] };
+        w.type.grabbed[0] = { p, t: now };
+        w.target = sub(p, w.type.drag_offset);
     }
 }
 function handleMouseUp(e: MouseEvent, w: FloatingWindow) {
-    if (w.grabbed) {
+    if (w.type.mode !== "floating") return;
+    if (w.type.grabbed) {
         const now = Date.now();
-        const a = w.grabbed;
+        const a = w.type.grabbed;
         const dt1 = a[0].t - a[1].t;
         const dt2 = now + 1 - a[0].t;
         const p = e2pos(e);
         const v1 = length(sub(a[0].p, a[1].p)) / dt1;
         const v2 = length(sub(p, a[0].p)) / dt2;
         const acceleration = v2 - v1;
-        w.pinned = Math.abs(acceleration) < 1.0
-        w.grabbed = null;
+        w.type.pinned = Math.abs(acceleration) < 1.0
+        w.type.grabbed = null;
     }
     window.removeEventListener("mousemove", (e: MouseEvent) => {handleMouseMove(e, w)});
     window.removeEventListener("mouseup", (e: MouseEvent) => {handleMouseUp(e, w)});
@@ -207,6 +211,7 @@ async function tick_windows() {
 
     WINDOWS.update((windows) => {
         for (var [id, w] of Object.entries(windows)) {
+            if (w.type.mode != "floating") continue;
             let is_sleeping = now - w.inactive_since > SLEEP_DT;
             if (is_sleeping && !is_resizing) { 
                 continue;
@@ -224,10 +229,9 @@ async function tick_windows() {
             let is_bound_y_min = (v: number) : boolean => v < min_y;
             let is_bound_y_max = (v: number) : boolean => v > max_y;
 
-            if (w.grabbed != null || w.pinned) {
-                
+            if (w.type.grabbed != null || w.type.pinned) {
                 w.velocity = sub(w.velocity, mul(w.velocity, dt * 15.0));
-                if (w.pinned) {
+                if (w.type.pinned) {
                     if (is_bound_x_min(w.pos.x)) w.target.x = min_x;
                     if (is_bound_x_max(w.pos.x)) w.target.x = max_x;
                     if (is_bound_y_min(w.pos.y)) w.target.y = min_y;
@@ -239,36 +243,36 @@ async function tick_windows() {
                 if (length_squared(w.velocity) < MAX_SPEED * MAX_SPEED)
                     w.velocity = add(w.velocity, mul(target_dir, target_l * ACCELERATION * dt));
             } else {
-                if (w.magnet == null) {w.velocity = sub(w.velocity, mul(w.velocity, dt * 2.0))};
+                if (w.type.magnet == null) {w.velocity = sub(w.velocity, mul(w.velocity, dt * 2.0))};
                 let x_max = is_bound_x_max(w.pos.x);
                 let x_min = is_bound_x_min(w.pos.x);
                 let y_max = is_bound_y_max(w.pos.y);
                 let y_min = is_bound_y_min(w.pos.y);
             
-                if (x_min) w.magnet = magnet_left(w.magnet);
-                if (y_min) w.magnet = magnet_top(w.magnet);
-                if (x_max) w.magnet = magnet_right(w.magnet);
-                if (y_max) w.magnet = magnet_bottom(w.magnet);
-                if (w.magnet) {
-                    w.velocity.x = w.velocity.x - (w.velocity.x * dt * (w.magnet.x == 0 ? 3.0 : 15.0))
-                    w.velocity.y = w.velocity.y - (w.velocity.y * dt * (w.magnet.y == 0 ? 3.0 : 15.0))
+                if (x_min) w.type.magnet = magnet_left(w.type.magnet);
+                if (y_min) w.type.magnet = magnet_top(w.type.magnet);
+                if (x_max) w.type.magnet = magnet_right(w.type.magnet);
+                if (y_max) w.type.magnet = magnet_bottom(w.type.magnet);
+                if (w.type.magnet) {
+                    w.velocity.x = w.velocity.x - (w.velocity.x * dt * (w.type.magnet.x == 0 ? 3.0 : 15.0))
+                    w.velocity.y = w.velocity.y - (w.velocity.y * dt * (w.type.magnet.y == 0 ? 3.0 : 15.0))
 
-                    if (w.magnet.x == -1) {
+                    if (w.type.magnet.x == -1) {
                         w.target.x = min_x;
                         let x_dt = w.pos.x - w.target.x;
                         w.velocity.x = w.velocity.x - ( x_dt * dt * ARCHIMEDES_FORCE);
                     }
-                    if (w.magnet.x == 1) {
+                    if (w.type.magnet.x == 1) {
                         w.target.x = max_x;
                         let x_dt = w.pos.x - w.target.x;
                         w.velocity.x = w.velocity.x - ( x_dt * dt * ARCHIMEDES_FORCE);
                     }
-                    if (w.magnet.y == -1) {
+                    if (w.type.magnet.y == -1) {
                         w.target.y = min_y;
                         let y_dt = w.pos.y - w.target.y;
                         w.velocity.y = w.velocity.y - ( y_dt * dt * ARCHIMEDES_FORCE);
                     }
-                    if (w.magnet.y == 1) {
+                    if (w.type.magnet.y == 1) {
                         w.target.y = max_y;
                         let y_dt = w.pos.y - w.target.y;
                         w.velocity.y = w.velocity.y - ( y_dt * dt * ARCHIMEDES_FORCE);
@@ -280,11 +284,11 @@ async function tick_windows() {
                 w.velocity = vec2(0, 0);
             }
             w.pos = add(w.pos, mul(w.velocity, dt));
-            if (!is_zero(w.velocity) || w.grabbed != null) {
+            if (!is_zero(w.velocity) || w.type.grabbed != null) {
                 w.inactive_since = now;
             }
             if (is_sleeping) {
-                w.magnet = null
+                w.type.magnet = null
             }
         }
         return windows
@@ -296,18 +300,19 @@ tick = requestAnimationFrame(tick_windows)
 
 
 export function handleResizeStart(e: MouseEvent, w: FloatingWindow, edge: number) {
+    if (w.type.mode !== "floating") return;
     e.stopPropagation();
     e.preventDefault();
     top_layer(w);
     const p = e2pos(e);
-    w.resizing = {
+    w.type.resizing = {
         edge,
         start_mouse: p,
         start_size: { ...w.size },
         start_pos: { ...w.pos },
     };
-    w.pinned = false;
-    w.grabbed = null;
+    w.type.pinned = false;
+    w.type.grabbed = null;
     w.velocity = vec2(0, 0);
 
     const moveListener = (e: MouseEvent) => resizeMove(e, w);
@@ -324,52 +329,54 @@ export function handleResizeStart(e: MouseEvent, w: FloatingWindow, edge: number
 
 function resizeMove(e: MouseEvent, w: FloatingWindow) {
     const p = e2pos(e);
-    if (!w.resizing) return;
+    if (w.type.mode !== "floating") return;
+    if (!w.type.resizing) return;
     w.inactive_since = 0; // force sleep
-    const dx = p.x - w.resizing.start_mouse.x;
-    const dy = p.y - w.resizing.start_mouse.y;
+    const dx = p.x - w.type.resizing.start_mouse.x;
+    const dy = p.y - w.type.resizing.start_mouse.y;
 
-    const edge = w.resizing.edge;
+    const edge = w.type.resizing.edge;
 
     if (edge >> 0 & 1) {
-        let target_width = w.resizing.start_size.x + dx;
-        let ofx = Math.max(0, w.resizing.start_pos.x + w.resizing.start_size.x * 0.5 + dx - half_screen.x + SCREEN_MARGIN);
+        let target_width = w.type.resizing.start_size.x + dx;
+        let ofx = Math.max(0, w.type.resizing.start_pos.x + w.type.resizing.start_size.x * 0.5 + dx - half_screen.x + SCREEN_MARGIN);
         target_width = clamp(target_width - ofx, w.min_size.x, w.max_size.x);
-        let delta = target_width - w.resizing.start_size.x;
+        let delta = target_width - w.type.resizing.start_size.x;
         w.size.x = target_width;
-        w.pos.x = w.resizing.start_pos.x + delta * 0.5;
+        w.pos.x = w.type.resizing.start_pos.x + delta * 0.5;
     }
     if (edge >> 1 & 1) {
-        let new_width = w.resizing.start_size.x - dx;
-        let ofx = Math.max(0, w.resizing.start_size.x * 0.5 - w.resizing.start_pos.x - dx - half_screen.x + SCREEN_MARGIN);
+        let new_width = w.type.resizing.start_size.x - dx;
+        let ofx = Math.max(0, w.type.resizing.start_size.x * 0.5 - w.type.resizing.start_pos.x - dx - half_screen.x + SCREEN_MARGIN);
         new_width = clamp(new_width - ofx, w.min_size.x, w.max_size.x);
-        const delta = new_width - w.resizing.start_size.x;
+        const delta = new_width - w.type.resizing.start_size.x;
         w.size.x = new_width;
-        w.pos.x = w.resizing.start_pos.x - delta * 0.5;
+        w.pos.x = w.type.resizing.start_pos.x - delta * 0.5;
     }
 
     if (edge >> 2 & 1) {
-        let new_height = w.resizing.start_size.y + dy;
-        let ofy = Math.max(0, w.resizing.start_pos.y + w.resizing.start_size.y * 0.5 + dy - half_screen.y + SCREEN_MARGIN);
-        new_height = clamp(new_height - ofy, w.min_size.x, w.max_size.x);
-        const delta = new_height - w.resizing.start_size.y;
+        let new_height = w.type.resizing.start_size.y + dy;
+        let ofy = Math.max(0, w.type.resizing.start_pos.y + w.type.resizing.start_size.y * 0.5 + dy - half_screen.y + SCREEN_MARGIN);
+        new_height = clamp(new_height - ofy, w.min_size.y, w.max_size.y);
+        const delta = new_height - w.type.resizing.start_size.y;
         w.size.y = new_height;
-        w.pos.y = w.resizing.start_pos.y + delta * 0.5;
+        w.pos.y = w.type.resizing.start_pos.y + delta * 0.5;
     }
     if (edge >> 3 & 1) {
-        let new_height = w.resizing.start_size.y - dy;
-        let ofy = Math.max(0, w.resizing.start_size.y * 0.5 - w.resizing.start_pos.y - dy - half_screen.y + SCREEN_MARGIN);
+        let new_height = w.type.resizing.start_size.y - dy;
+        let ofy = Math.max(0, w.type.resizing.start_size.y * 0.5 - w.type.resizing.start_pos.y - dy - half_screen.y + SCREEN_MARGIN);
         new_height = clamp(new_height - ofy, w.min_size.y, w.max_size.y);
-        const delta = new_height - w.resizing.start_size.y;
+        const delta = new_height - w.type.resizing.start_size.y;
         w.size.y = new_height;
-        w.pos.y = w.resizing.start_pos.y - delta * 0.5;
+        w.pos.y = w.type.resizing.start_pos.y - delta * 0.5;
 
     }
 }
 
 function resizeEnd(w: FloatingWindow) {
-    w.resizing = null;
-    w.magnet = null;
+    if (w.type.mode !== "floating") return;
+    w.type.resizing = null;
+    w.type.magnet = null;
     w.inactive_since = Date.now();
 }
 

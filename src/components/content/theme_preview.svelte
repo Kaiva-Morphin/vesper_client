@@ -24,13 +24,13 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="w-full h-fit flex gap-2 flex-row-reverse items-center justify-between p-2 pl-3 font-bold card-base card-100 card-100-border theme-calc text-md cursor-pointer overflow-clip" 
+<div class="w-full h-fit flex gap-2 flex-row-reverse items-center justify-between p-2 pl-3 font-bold card-base card-100 card-100-border theme-calc text-md cursor-pointer " 
     data-theme={typeof theme == "string" ? theme : ""}
     data-neo={neo}
     style={style}
     onclick={onclick}>
     
-    <div class="grid grid-cols-3 min-w-fit h-full gap-0.5">
+    <div class="grid grid-cols-3 h-full gap-0.5 min-w-[64px]">
         <div data-tip="primary" class="rounded-full h-6 w-6 tooltip bg-[var(--color-primary)]"></div>
         <div data-tip="secondary" class="rounded-full h-6 w-6 tooltip bg-[var(--color-secondary)]"></div>
         <div data-tip="accent" class="rounded-full h-6 w-6 tooltip bg-[var(--color-accent)]"></div>
@@ -38,8 +38,8 @@
         <div data-tip="success" class="rounded-full h-6 w-6 tooltip bg-[var(--color-success)]"></div>
         <div data-tip="error" class="rounded-full h-6 w-6 tooltip bg-[var(--color-error)]"></div>
     </div>
-    <div class="flex flex-col  gap-2 items-center">
-        {theme_name}
+    <div class="flex-1 min-w-0 flex flex-col gap-2 items-start ">
+        <span class="truncate block max-w-[96px] self-center">{theme_name}</span>
         <slot></slot>
-    </div>
+  </div>
 </div>

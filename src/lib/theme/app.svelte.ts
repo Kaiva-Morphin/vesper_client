@@ -8,19 +8,19 @@ export const CURRENT_THEME_KEY = "current_app_theme";
 
 const properties = {
   neo: { typename: "data_boolean", css_key: "data-neo", display_name: "Neo theme", data_key: "data-neo" },
-  primary: { typename: "RgbaColor", css_key: "--color-primary", display_name: "Primary color" },
-  primary_content: { typename: "RgbaColor", css_key: "--color-primary-content", display_name: "Primary content", data_key: "" },
-  secondary: { typename: "RgbaColor", css_key: "--color-secondary", display_name: "Secondary color" },
-  secondary_content: { typename: "RgbaColor", css_key: "--color-secondary-content", display_name: "Secondary content" },
-  accent: { typename: "RgbaColor", css_key: "--color-accent", display_name: "Accent color" },
-  accent_content: { typename: "RgbaColor", css_key: "--color-accent-content", display_name: "Accent content" },
-  info: { typename: "RgbaColor", css_key: "--color-info", display_name: "Info color" },
-  info_content: { typename: "RgbaColor", css_key: "--color-info-content", display_name: "Info content" },
-  success: { typename: "RgbaColor", css_key: "--color-success", display_name: "Success color" },
-  success_content: { typename: "RgbaColor", css_key: "--color-success-content", display_name: "Success content" },
-  error: { typename: "RgbaColor", css_key: "--color-error", display_name: "Error color" },
-  error_content: { typename: "RgbaColor", css_key: "--color-error-content", display_name: "Error content" },
-  base_content: { typename: "RgbaColor", css_key: "--color-base-content", display_name: "Base content" },
+  primary: { typename: "fake_rgba", css_key: "--color-primary", display_name: "Primary color" },
+  primary_content: { typename: "fake_rgba", css_key: "--color-primary-content", display_name: "Primary content", data_key: "" },
+  secondary: { typename: "fake_rgba", css_key: "--color-secondary", display_name: "Secondary color" },
+  secondary_content: { typename: "fake_rgba", css_key: "--color-secondary-content", display_name: "Secondary content" },
+  accent: { typename: "fake_rgba", css_key: "--color-accent", display_name: "Accent color" },
+  accent_content: { typename: "fake_rgba", css_key: "--color-accent-content", display_name: "Accent content" },
+  info: { typename: "fake_rgba", css_key: "--color-info", display_name: "Info color" },
+  info_content: { typename: "fake_rgba", css_key: "--color-info-content", display_name: "Info content" },
+  success: { typename: "fake_rgba", css_key: "--color-success", display_name: "Success color" },
+  success_content: { typename: "fake_rgba", css_key: "--color-success-content", display_name: "Success content" },
+  error: { typename: "fake_rgba", css_key: "--color-error", display_name: "Error color" },
+  error_content: { typename: "fake_rgba", css_key: "--color-error-content", display_name: "Error content" },
+  base_content: { typename: "fake_rgba", css_key: "--color-base-content", display_name: "Base content" },
   tint_100: { typename: "percent", css_key: "--tint-100o", display_name: "Tint main" },
   tint_200: { typename: "percent", css_key: "--tint-200o", display_name: "Tint nested" },
   radius_selector: { typename: "px", css_key: "--radius-selector", display_name: "Radius selector" },
@@ -41,8 +41,8 @@ type AppThemeValues = {
 };
 
 export const appThemeTypes = {
-    RgbaColor: Object.entries(properties)
-        .filter(([, value]) => value.typename === "RgbaColor")
+    fake_rgba: Object.entries(properties)
+        .filter(([, value]) => value.typename === "fake_rgba")
         .map(([key]) => key as PropertyKey),
     percent: Object.entries(properties)
         .filter(([, value]) => value.typename === "percent")
@@ -126,7 +126,6 @@ export function setNonOverrideTheme(t: string | AppTheme) {
         localStorage.setItem(CURRENT_THEME_KEY, serializeTheme(theme));
         return;
     } else {
-        console.log("CUS");
         applyTheme(t, root);
         THEME.set(t);
         setDataToElement(root, "data-theme", null);

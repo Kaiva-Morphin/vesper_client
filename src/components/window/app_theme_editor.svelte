@@ -39,7 +39,7 @@ in:scale={{duration: 300, easing: easeOutQuint, start: 0.5}}
                     no-alpha  dark-picker
                     "
                     >
-                {#each appThemeTypes.RgbaColor as t}
+                {#each appThemeTypes.fake_rgba as t}
                     <ColorPicker
                         label={$THEME[t].display_name}
                         isAlpha={false}

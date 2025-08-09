@@ -16,6 +16,8 @@ export class CssStyleProperty<T> {
     value: T;
     typename: keyof TypeMap;
     data_key?: string;
+    min?: T;
+    max?: T;
 
     constructor(
         key: string,
@@ -23,14 +25,16 @@ export class CssStyleProperty<T> {
         display_name: string,
         typename: keyof TypeMap,
         value: T,
-        data_key?: string
+        public options?: { data_key?: string; min?: T; max?: T }
     ) {
         this.key = key;
         this.css_key = css_key;
         this.display_name = display_name;
         this.value = value;
         this.typename = typename;
-        this.data_key = data_key;
+        this.data_key = options?.data_key;
+        this.min = options?.min;
+        this.max = options?.max;
     }
 
     apply(el: HTMLElement) {
@@ -46,13 +50,30 @@ export class CssStyleProperty<T> {
     }
     toCssString(): string {
         switch (this.typename) {
-        case "RgbaColor":
+        case "fake_rgba":
             const c = this.value as unknown as RgbaColor;
             return `rgb(${c.r}, ${c.g}, ${c.b})`;
+        case "rgba":
+            const ca = this.value as unknown as RgbaColor;
+            return `rgba(${ca.r}, ${ca.g}, ${ca.b}, ${ca.a})`;
         case "percent":
-            return percentToCss(this.value as unknown as number);
+            let vpc : number = this.value as unknown as number;
+            if (this.min) {
+                vpc = Math.max(this.min as unknown as number, vpc);
+            }
+            if (this.max) {
+                vpc = Math.min(this.max as unknown as number, vpc);
+            }
+            return percentToCss(vpc);
         case "px":
-            return pxToCss(this.value as unknown as number);
+            let vpx : number = this.value as unknown as number;
+            if (this.min) {
+                vpx = Math.max(this.min as unknown as number, vpx);
+            }
+            if (this.max) {
+                vpx = Math.min(this.max as unknown as number, vpx);
+            }
+            return pxToCss(vpx);
         case "number":
             return (this.value as unknown as number).toString();
         case "string":
@@ -80,8 +101,12 @@ export class CssStyleProperty<T> {
     ): CssStyleProperty<T> {
         let value: any;
         switch (type) {
-            case "RgbaColor":
+            case "fake_rgba":
                 value = CssStyleProperty.parseOklch(cssValue);
+                break;
+            case "rgba":
+                value = CssStyleProperty.parseOklch(cssValue);
+                console.warn("Parsing rgba from oklch css value with default fn - alpha will be lost");
                 break;
             case "percent":
                 value = CssStyleProperty.parsePercent(cssValue);
@@ -104,8 +129,7 @@ export class CssStyleProperty<T> {
             default:
                 value = cssValue;
         }
-
-        return new CssStyleProperty<T>(key, css_key, display_name, type, value, data_key);
+        return new CssStyleProperty<T>(key, css_key, display_name, type, value, {data_key: data_key});
     }
 
     static fromDataValue<T>(
@@ -122,7 +146,7 @@ export class CssStyleProperty<T> {
                 value = data_value?.trim() === "true";
                 break;
         }
-        return new CssStyleProperty<T>(key, css_key, display_name, type, value, data_key);
+        return new CssStyleProperty<T>(key, css_key, display_name, type, value, {data_key: data_key});
     }
 
     static parseOklch(cssValue: string): RgbaColor {
@@ -148,7 +172,7 @@ export class CssStyleProperty<T> {
 
     formatJSON() : any {
         switch (this.typename) {
-            case "RgbaColor":
+            case "fake_rgba":
                 let c = this.value as unknown as RgbaColor;
                 return {r: c.r, g: c.g, b: c.b};
             default:
@@ -157,19 +181,20 @@ export class CssStyleProperty<T> {
     }
     static fromSerializedJSON<T>(json: any, key: string, object_properties: any) : CssStyleProperty<T> {
         switch (object_properties.typename) {
-            case "RgbaColor":
+            case "fake_rgba":
                 let v : RgbaColor = {r: json.r as number, g: json.g as number, b: json.b as number, a: 1};
                 return new CssStyleProperty<T>(key, object_properties.css_key, object_properties.display_name, 
-                    "RgbaColor", v as any, object_properties.data_key);
+                    "fake_rgba", v as any, {data_key: object_properties.data_key});
             default:
                 return new CssStyleProperty<T>(key, object_properties.css_key, object_properties.display_name, 
-                    object_properties.typename, json as any, object_properties.data_key);
+                    object_properties.typename, json as any, {data_key: object_properties.data_key});
         }
     }
 }
 
 export type TypeMap = {
-  RgbaColor: RgbaColor;
+  rgba: RgbaColor;
+  fake_rgba: RgbaColor,
   number: number;
   string: string;
   percent: number;

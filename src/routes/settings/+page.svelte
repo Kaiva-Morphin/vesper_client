@@ -15,14 +15,14 @@
     import AppThemeEditor from "$lib/../components/window/app_theme_editor.svelte";
     import { logout } from "$lib/api/auth.svelte";
     import Miniprofile from "../../components/user/miniprofile.svelte";
-    import MiniprofileEditor from "../../components/window/miniprofile.svelte";
+    import MiniprofileEditor from "../../components/window/miniprofile_editor.svelte";
     import { USER_UID } from "$lib/token.svelte";
     import Separator from "../../components/content/separator.svelte";
     import Popup from "../../components/popup.svelte";
     import { type MiniprofileTheme } from "$lib/theme/miniprofile.svelte";
-
-    const media_limit = 0.25;
-    export const MEDIA_RULE = localState("media_rule_setting", "none");
+    import { newToast } from "$lib/toast.svelte";
+    import { media_limit, MEDIA_RULE } from "$lib/consts.svelte";
+    
     
     let themes : Writable<Record<string, string>> = localState("saved_themes", {});
     
@@ -48,8 +48,15 @@
             shakeById("theme_name")
             return;
         }
-        $themes[theme_name] = serializeTheme(get(THEME));
-        theme_name = "";
+        let force_update = theme_name in $themes;
+        let theme =  get(THEME);
+        $themes[theme_name] = serializeTheme(theme);
+        if (force_update) {
+            updater += 1;
+            console.log("Force update")
+        }
+        parsed_themes[theme_name] = theme;
+        // theme_name = "";
     }
     function deleteTheme(name: string){
         delete parsed_themes[name];
@@ -67,25 +74,32 @@
             props: {
                 id: "theme_editor",
             }
-        } as FloatingWindow);        
+        } as FloatingWindow);       
+
     }
     type PopupEdit = 'bg' | 'avatar' | 'nickname';
     const MINIPROFILE_PREVIEW = "miniprofile_preview";
     let popup : PopupEdit | null = $state(null);
+    
     const start_edit_miniprofile : (initial_theme: MiniprofileTheme | null) => void = (initial_theme: MiniprofileTheme | null) => {
         openFloating({
             ...DefaultWindow,
             component: MiniprofileEditor,
-            min_size: vec2(265, 400),
-            size: vec2(265, 400),
+            min_size: vec2(265, 300),
+            size: vec2(265, 300),
+            max: vec2(300, 600),
             id: "miniprofile_editor",
             props: {
                 id: "miniprofile_editor",
+                onclose: () => {profile_editor += 1},
+                refresh_preview: () => {profile_editor += 1},
                 initial_theme: initial_theme,
                 em_id: MINIPROFILE_PREVIEW
             }
         } as FloatingWindow); 
     };
+    let profile_editor = $state(0);
+    let updater = $state(0);
 </script>
 
 
@@ -107,18 +121,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
 
 <div class="w-full flex justify-center relative">
     <div class="w-full flex flex-col h-fit max-w-[900px] p-2 card-base card-100 card-100-border gap-2">
-        {#if $USER_UID != null}
-        <CollapseSetting icon="mingcute:user-3-line" open>
-            <div slot="title">Account</div>
-            <div slot="content">
-                <button class="btn w-full btn-error" onclick={()=> {logout();}}>Log out</button>
-                <Miniprofile 
-                user_id={$USER_UID} 
-                id={MINIPROFILE_PREVIEW}
-                start_edit={start_edit_miniprofile}/>
-            </div>
-        </CollapseSetting>
-        {/if}
+        
 
 
         <CollapseSetting icon="mingcute:paint-brush-ai-line" open>
@@ -128,7 +131,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                 <LabelSeparator><h2>Customize</h2></LabelSeparator>
                 <div class="flex flex-row p-2 card-base card-100 card-100-border">
                     <div class="grid grid-rows-4 w-full h-full gap-2 grid-flow-col no-alpha">
-                        {#each appThemeTypes.RgbaColor as t}
+                        {#each appThemeTypes.fake_rgba as t}
                             <ColorPicker
                                 label={$THEME[t].display_name}
                                 isAlpha={false}
@@ -158,6 +161,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                 </div>
                 <LabelSeparator><h2>Your themes</h2></LabelSeparator>
                 <div class="grid grid-cols-4 gap-2 ">
+                    {#key updater}
                     {#each Object.entries(parsed_themes) as [key, theme] (key)}
                         <ThemePreview theme={{theme: theme, name: key}}
                         onclick={()=> {setNonOverrideTheme(theme); theme_name = key;}}
@@ -165,6 +169,7 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
                         <Button icon="tabler:trash" class="btn btn-border btn-error w-full pr-1" onclick={(e : MouseEvent) => {e.preventDefault(); e.stopPropagation(); deleteTheme(key)}}></Button>
                         </ThemePreview>
                     {/each}
+                    {/key}
                 </div>  
                 <LabelSeparator><h2>Default presets</h2></LabelSeparator>
                 <div class="grid grid-cols-4 gap-2">
@@ -180,16 +185,26 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
 
             </div>
         </CollapseSetting>
-        <!-- <CollapseSetting icon="tabler:photo">
-            <div slot="title">Images</div>
-            <div slot="content">
+        {#if $USER_UID != null}
+        <CollapseSetting icon="mingcute:user-3-line" open>
+            <div slot="title">Account</div>
+            <div slot="content" class="flex flex-col gap-4">
+                {#key profile_editor}
+                    <Miniprofile 
+                        user_id={$USER_UID} 
+                        id={MINIPROFILE_PREVIEW}
+                        start_edit={start_edit_miniprofile}
+                    />
+                {/key}
                 <select class="select" bind:value={$MEDIA_RULE}>
                     <option value="none">[max {media_limit}MB] Dont do anything</option>
-                    <option value="compress">[max {media_limit}MB] Compress to {media_limit}MB before send</option>
-                    <option value="upload">[max 200MB] Upload to catbox (your media will be public) </option>
+                    <!-- <option value="compress">[max {media_limit}MB] Compress to {media_limit}MB before send</option> -->
+                    <option value="catbox">[max 200MB] Upload to catbox (your media will be public) </option>
                 </select>
+                <button class="btn w-full hover-shake btn-error btn-border" onclick={()=> {logout();newToast("Logged out", "btn-error")}}>Log out</button>
             </div>
-        </CollapseSetting> -->
+        </CollapseSetting>
+        {/if}
     </div>
 </div>
 

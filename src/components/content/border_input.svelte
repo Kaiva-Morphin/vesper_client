@@ -3,8 +3,8 @@
     let {
         value = $bindable(),
         id = null,
-        placeholder,
-        icon,
+        placeholder = "",
+        icon = null,
         class: extra_class = "",
         password = false,
         autocomplete = null,

@@ -487,3 +487,8 @@ html {
 .hover-shake:hover {
   animation: shake 0.25s infinite;
 }
+
+.no-focus:focus-visible {
+    outline: none;
+    border: none;
+}

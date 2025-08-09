@@ -13,7 +13,7 @@
     }
     let calls_resizer = {
         max: 400,
-        min: 128,
+        min: 160,
         base: 0,
         start: 0,
     }
@@ -59,13 +59,8 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class=" vh flex-grow flex">
     <div class="w-[128px] max-vh card-100 card-base card-100-border flex flex-col gap-2 p-2 {$calls_val == 0 ? 'hidden' : ''}" style="flex-basis:{$calls_val}px">
-        <div class="w-full bg-[#0005] h-32 p-2 gap-2 flex">
-            <Icon class="min-w-[24px]" icon="flowbite:volume-up-solid" height=24px/>
-            <Icon class="min-w-[24px] p-[3px]" icon="fa:lock" height=24px/>
-            <div class="text-ellipsis overflow-hidden">Ясосу</div>
-            <!-- <div class="text-ellipsis flex-grow overflow-clip">VoiceAsdasdasdasdasdasd</div> -->
-        </div>
         <Channel></Channel>
+        <Channel private></Channel>
     </div>
     <div class="relative h-full {$calls_val > 0 ? 'w-1' : ''}">
         <div class="z-10 absolute h-full resizer w-[12px] hover:bg-[#FFF2]" 

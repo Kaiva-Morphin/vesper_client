@@ -2,10 +2,12 @@
     let { 
         url, 
         class : extra_class = "",
+        mini=false,
         onclick = () => {},
     } : {
         url: { path?: string | null; nickname?: string },
         class?: String,
+        mini?: boolean,
         onclick?: (e: MouseEvent) => void
     } = $props();
     // Get identifier (either path or nickname)
@@ -28,7 +30,7 @@
     {#if url.path}
         <img class="mini-bg pointer-events-none" src={url.path} alt="" onerror={(em: any) => {em.currentTarget.src="/placeholder.jpg"}}>
     {:else}
-        <div class="fallback-avatar" style="--hue: {hue}">
+        <div class="fallback-avatar" style="--hue: {hue}; font-size: {mini ? "16px" : "32px"}">
             {firstLetter}
         </div>
     {/if}
@@ -39,7 +41,7 @@
         width: 100%;
         height: 100%;
         border-radius: 50%;
-        font-size: x-large;
+        /* font-size: x-large; */
         background-color: hsl(var(--hue), 70%, 50%);
         color: white;
         display: flex;

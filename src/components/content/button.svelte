@@ -4,22 +4,33 @@
         icon = null,
         class:classExtra=null,
         collapsed_opacity=null,
+        request = false,
+        loading = false,
         onclick = (e: MouseEvent) : void => {}
     } = $props();
-
+    let is_loading = $state(false);
 </script>
 
 <button
     class="btn {classExtra} flex overflow-clip p-0 gap-0 {collapsed_opacity?"collapsable":""}"
     style="--op:{collapsed_opacity}"
-    onclick={(e) => {onclick(e)}}
+    onclick={async (e) => {
+        if (is_loading || loading) {return}
+        if (request) {is_loading = true}
+        await onclick(e);
+        is_loading = false;
+    }}
 >
-    {#if icon}
-    <Icon icon={icon} height=24px class="ml-[6px]"></Icon>
+    {#if is_loading || loading}
+        <Icon icon="svg-spinners:gooey-balls-1" height=24px></Icon>
+    {:else}
+        {#if icon}
+        <Icon icon={icon} height=24px class="ml-[6px]"></Icon>
+        {/if}
+        <div class='ml-[6px]'>
+            <slot></slot>
+        </div>
     {/if}
-    <div class='ml-[6px]'>
-        <slot></slot>
-    </div>
 </button>
 
 <style>

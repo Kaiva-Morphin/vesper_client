@@ -1,4 +1,5 @@
 <script lang='ts'>
+  import { THEME } from "$lib/theme/app.svelte";
 	import { WebGlShader } from "svader";
     const shaderCode = `#version 300 es
         precision highp float;
@@ -17,8 +18,10 @@
             fragColor = vec4(st, 0.0, 1.0);
         }
     `;
-
-    
+    THEME.subscribe(t => {
+        color = [t.primary.value.r / 255.,  t.primary.value.g / 255.,  t.primary.value.b / 255.,  t.primary.value.a / 255.];
+        console.log(color)
+    })
 
 	var color : [number, number, number, number] = $state([1., 1., 1., 1.]);
 </script>

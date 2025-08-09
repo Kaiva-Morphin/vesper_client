@@ -2,11 +2,11 @@ import { writable, type Writable } from "svelte/store";
 import { CssStyleProperty, type TypeMap } from "./abstraction.svelte";
 
 const properties = {
-    base_content: { typename: "RgbaColor", css_key: "--color-base-content", display_name: "Base content" },
-    primary_color: { typename: "RgbaColor", css_key: "--color-primary", display_name: "Primary color", data_key: "" },
-    secondary_color: { typename: "RgbaColor", css_key: "--color-secondary", display_name: "Primary secondary", data_key: "" },
-    tint_100: { typename: "percent", css_key: "--tint-bg", display_name: "Tint bg" },
-    radius_avatar: { typename: "px", css_key: "--radius-avatar", display_name: "Radius avatar" },
+    base_content: { typename: "rgba", css_key: "--miniprofile-content", display_name: "Base content" },
+    primary_color: { typename: "rgba", css_key: "--color-primary", display_name: "Primary color", data_key: "" },
+    secondary_color: { typename: "rgba", css_key: "--color-secondary", display_name: "Secondary color", data_key: "" },
+    tint: { typename: "percent", css_key: "--tint-bg", display_name: "Tint bg", min: 0, max: 30 },
+    radius_avatar: { typename: "px", css_key: "--miniprofile-avatar", display_name: "Radius avatar", min: 0, max: 50 },
 } as const;
 
 type PropertiesMap = typeof properties;
@@ -22,8 +22,8 @@ type MiniprofileThemeValues = {
 };
 
 export const miniprofileThemeTypes = {
-    RgbaColor: Object.entries(properties)
-        .filter(([, value]) => value.typename === "RgbaColor")
+    rgba: Object.entries(properties)
+        .filter(([, value]) => value.typename === "rgba")
         .map(([key]) => key as PropertyKey),
     percent: Object.entries(properties)
         .filter(([, value]) => value.typename === "percent")
@@ -34,16 +34,19 @@ export const miniprofileThemeTypes = {
 } as const;
 
 const defaultValues: Partial<MiniprofileThemeValues> = {
-  base_content: { r: 1, g: 1, b: 1, a: 1 },
-  primary_color: { r: 1, g: 1, b: 1, a: 1 },
-  secondary_color: { r: 1, g: 1, b: 1, a: 1 },
-  tint_100: 10,
+  base_content: { r: 255, g: 255, b: 255, a: 1 },
+  primary_color: { r: 255, g: 255, b: 255, a: 1 },
+  secondary_color: { r: 255, g: 255, b: 255, a: 1 },
+  tint: 10,
   radius_avatar: 10,
 };
 
-export const DEFAULT_MINIPROFILE_THEME: MiniprofileTheme = Object.fromEntries(
+export const DEFAULT_MINIPROFILE_THEME: () => MiniprofileTheme = () => (Object.fromEntries(
   Object.entries(properties).map(([key, meta]) => {
     const value = defaultValues[key as PropertyKey];
+    const options: { min?: number; max?: number } = {};
+    if ('min' in meta) options.min = meta.min;
+    if ('max' in meta) options.max = meta.max;
     return [
       key,
       new CssStyleProperty(
@@ -51,11 +54,16 @@ export const DEFAULT_MINIPROFILE_THEME: MiniprofileTheme = Object.fromEntries(
         meta.css_key,
         meta.display_name,
         meta.typename,
-        value
+        value,
+        Object.keys(options).length > 0 ? options : undefined
       ),
     ];
   })
-) as MiniprofileTheme;
+) as MiniprofileTheme);
+
+
+
+
 const root = document.documentElement;
 let init_style = getComputedStyle(root);
 
@@ -75,7 +83,7 @@ export function clearMiniprofileTheme(el: HTMLElement){
     }
 }
 
-export function themeToStyle(theme: MiniprofileTheme) : string {
+export function miniprofileThemeToStyle(theme: MiniprofileTheme) : string {
     let style = "";
     for (const key in theme) {
         style += theme[key as keyof MiniprofileTheme].css_key + ":" + theme[key as keyof MiniprofileTheme].toCssString() + ";";

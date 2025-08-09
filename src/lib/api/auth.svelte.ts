@@ -109,12 +109,18 @@ export async function login(turnstile: string, email: string, password: string )
             })
         });
         
-        if (!res.ok) return await res.text();
+        if (!res.ok) {
+            if (res.status === 500) {
+                return "Something went wrong!";
+            }
+            return await res.text();
+        }
         let j = await res.json();
         return j
     } catch (e: any) {
         return "Something went wrong!";
     }
+    
 }
 
 export async function logout() {
@@ -162,7 +168,7 @@ export async function checkUid(uid: string): Promise<boolean | null> {
     return null;
 }
 
-export async function refresh() : Promise<boolean> {
+export async function refresh() : Promise<boolean | null> {
     try {
         const res = await fetch(`${PUBLIC_API_BASE}/api/auth/tokens/refresh`, {
             headers: {
@@ -174,11 +180,16 @@ export async function refresh() : Promise<boolean> {
             })
         });
         let j = await res.json();
-        if (!res.ok) {console.error("CAN'T REFRESH TOKENS: ", j); return false;}
+        if (!res.ok) {
+            console.error("CAN'T REFRESH TOKENS: ", j); 
+            if (res.status == 500) return null;
+            if (res.status == 401) clearRefresh();
+            return false
+        }
         setAccess(j);
         return true;
     } catch {}
-    return false;
+    return null;
 }
 
 export function clearRefresh() {
