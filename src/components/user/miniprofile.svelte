@@ -1,27 +1,50 @@
 <script lang="ts">
     import { get_miniprofile, type MiniProfile } from "$lib/api/profile.svelte";
     import Icon from "@iconify/svelte";
-
     import Avatar from "./avatar.svelte";
     import { applyMiniprofileTheme, DEFAULT_MINIPROFILE_THEME, deserializeMiniprofileTheme, miniprofileThemeToStyle, type MiniprofileTheme } from "$lib/theme/miniprofile.svelte";
+    import { tick } from "svelte";
+    import { vec2, type Vec2 } from "$lib/window/floating.svelte";
+  import { get_profile_cache, refresh_user_miniprofile_cache } from "$lib/globals.svelte";
 
-    let {id, user_id, start_edit = null} : {
-        id: string,
+    let {
+        id, 
+        user_id, 
+        start_edit = null,
+        on_size_changed = null
+    } : {
+        id?: string,
         user_id: string,
         start_edit?: ((initial_theme: MiniprofileTheme | null) => void) | null,
+        on_size_changed?: ((size: Vec2) => void) | null
     } = $props();
-    let miniprofile : MiniProfile | null = $state(null);
+    let profile = get_profile_cache(user_id);
+
+    
     let theme : MiniprofileTheme = $state(DEFAULT_MINIPROFILE_THEME());
+
     let style = $state("");
-    get_miniprofile(user_id).then(
-        (r) => {
-            miniprofile = r; 
-            if (r?.encoded_theme) {
-                theme = deserializeMiniprofileTheme(r?.encoded_theme)
-            }
+
+    profile.subscribe(n => {
+        if (n && n.miniprofile && n.miniprofile.encoded_theme) {
+            theme = deserializeMiniprofileTheme(n.miniprofile.encoded_theme);
             style = miniprofileThemeToStyle(theme);
         }
-    );
+    })
+
+    refresh_user_miniprofile_cache(user_id);
+    // get_miniprofile(user_id).then(
+    //     (r) => {
+    //         miniprofile = r; 
+    //         if (r?.encoded_theme) {
+    //             theme = deserializeMiniprofileTheme(r?.encoded_theme)
+    //         }
+    //         style = miniprofileThemeToStyle(theme);
+    //     }
+    // );
+
+    
+
     // svelte-ignore non_reactive_update
     let bg_el : any;
 	function handleError() {
@@ -30,34 +53,44 @@
     function isVideo(file: string): boolean {
         return /\.(mp4|webm|ogg)$/i.test(file);
     }
+    $effect(() => {
+        (async () => {
+            await tick();
+            if (container_el && on_size_changed) {
+                const rect = container_el.getBoundingClientRect();
+                on_size_changed(vec2(rect.width, rect.height));
+            }
+        })()
+    })
+    let container_el : HTMLElement;
 </script>
 
 
 
   
-<div class="mini-container card-base card-100 flex flex-col" id={id} style={style}>
-    {#if !miniprofile}
+<div class="mini-container card-base card-100 flex flex-col" id={id} style={style} bind:this={container_el}>
+    {#if !$profile?.miniprofile}
         <div class="w-full absolute h-full my-skeleton"></div>
     {:else}
-        {#if miniprofile.background == null}
+        {#if $profile?.miniprofile.background == null}
         <div class="mini-bg"></div>
-        {:else if isVideo(miniprofile.background)}
+        {:else if isVideo($profile?.miniprofile.background)}
         <video autoplay loop muted playsinline class="mini-bg" poster="" bind:this={bg_el}>
-            <source src={miniprofile.background} type="video/mp4" class="" onerror={() => {handleError();}}>
+            <source src={$profile?.miniprofile.background} type="video/mp4" class="" onerror={() => {handleError();}}>
         </video>
         {:else}
-        <img class="mini-bg" src={miniprofile.background} alt="" onerror={(em: any) => {em.currentTarget.src="/placeholder.jpg"}}>
+        <img class="mini-bg" src={$profile?.miniprofile.background} alt="" onerror={(em: any) => {em.currentTarget.src="/placeholder.jpg"}}>
         {/if}
         <div class="mini-header flex flex-row w-full gap-[28px]">
             <!-- <img src="http://localhost:2000/avatar.jpg" class="mini-avatar" alt=""> -->
             <Avatar class="mini-avatar" url={
-                {nickname: miniprofile.nickname, path: miniprofile.avatar}
+                {nickname: $profile?.miniprofile.nickname, path: $profile?.miniprofile.avatar}
             }>
             </Avatar>
              <!-- overflow-y-visible -->
             <div class="flex flex-col h-full justify-center pt-[14px] flex-grow max-w-[200px] overflow-ellipsis">
-                <div class="text-2xl pr-2 truncate font-bold">{miniprofile.nickname}</div>
-                <div  class="text-xs font-bold opacity-75 pl-0.5">{miniprofile.uid}</div>
+                <div class="text-2xl pr-2 truncate font-bold">{$profile?.miniprofile.nickname}</div>
+                <div  class="text-xs font-bold opacity-75 pl-0.5">{$profile?.miniprofile.guid}</div>
                 <!-- <div class="flex flex-row gap-1"> -->
                 <!-- </div> -->
                 <!-- <div class="flex flex-row gap-1">

@@ -1,4 +1,4 @@
-import { TITLEBAR_SIZE } from "$lib/consts.svelte";
+import { MOUSE_POS, TITLEBAR_SIZE } from "$lib/globals.svelte";
 import { clamp, localState, shakeById } from "$lib/util.svelte";
 import type { SvelteComponent } from "svelte";
 import { get, writable, type Writable } from "svelte/store";
@@ -62,7 +62,7 @@ export type FloatingWindow = {
 }
 export type FloatingWindowType =
     | { mode: 'floating', drag_offset: Vec2, pinned: boolean, magnet: Magnet | null, resizing: null | { edge: number, start_mouse: Vec2, start_size: Vec2, start_pos: Vec2 }, grabbed: null | [TimedVec2, TimedVec2] }
-    | { mode: 'fixed' }
+    | { mode: 'fixed', targetId: string, offset: Vec2 }
     | { mode: 'follow' };
 
 export const DefaultWindow = {
@@ -101,10 +101,11 @@ export const WINDOWS : Writable<Record<string, FloatingWindow>> = writable({
 });
 
 export function top_layer(caller: FloatingWindow) {
+    if (caller.type.mode !== "floating") return;
     let current = caller.z_index;
     WINDOWS.update((windows) => {
         for (var [id, w] of Object.entries(windows)) {
-            let start = w.z_index;
+            if (w.type.mode != "floating") continue;
             if (w.z_index > current) w.z_index -= 1;
             if (id == caller.id) w.z_index = Object.keys(windows).length - 1;
         }
@@ -203,93 +204,159 @@ function magnet_right(m: Magnet | null) : Magnet {
     return n;
 }
 
+
+
+function clamp_target_to_screen(w: FloatingWindow) {
+    let half_size = mul(w.size, 0.5);
+    const min_x = half_size.x + SCREEN_MARGIN - half_screen.x;
+    const min_y = half_size.y + SCREEN_MARGIN - half_screen.y;
+    const max_x = half_screen.x - half_size.x - SCREEN_MARGIN;
+    const max_y = half_screen.y - half_size.y - SCREEN_MARGIN;
+
+    w.target.x = Math.max(min_x, Math.min(max_x, w.target.x));
+    w.target.y = Math.max(min_y, Math.min(max_y, w.target.y));
+}
+
+function apply_squishy_movement(w: FloatingWindow, dt: number, acceleration: number = ACCELERATION,dumping: number = 15.0) {
+    w.velocity = sub(w.velocity, mul(w.velocity, dt * dumping));
+
+    let pos_dt = sub(w.target, w.pos);
+    let target_dir = normalize_or_zero(pos_dt);
+    let target_l = length(pos_dt);
+    if (length_squared(w.velocity) < MAX_SPEED * MAX_SPEED)
+        w.velocity = add(w.velocity, mul(target_dir, target_l * acceleration * dt));
+    if (length_squared(w.velocity) < 0.001) {
+        w.velocity = vec2(0, 0);
+    }
+    w.pos = add(w.pos, mul(w.velocity, dt));
+}
+
+
+function update_floating(w: FloatingWindow, dt: number, now: number) {
+    if (w.type.mode !== "floating") return;
+    let half_size = mul(w.size, 0.5);
+
+    const min_x = half_size.x + SCREEN_MARGIN - half_screen.x;
+    const min_y = half_size.y + SCREEN_MARGIN - half_screen.y;
+    const max_x = half_screen.x - half_size.x - SCREEN_MARGIN;
+    const max_y = half_screen.y - half_size.y - SCREEN_MARGIN;
+
+    let is_bound_x_min = (v: number) : boolean => v < min_x;
+    let is_bound_x_max = (v: number) : boolean => v > max_x;
+    let is_bound_y_min = (v: number) : boolean => v < min_y;
+    let is_bound_y_max = (v: number) : boolean => v > max_y;
+
+    if (w.type.grabbed != null || w.type.pinned) {
+        w.velocity = sub(w.velocity, mul(w.velocity, dt * 15.0));
+        if (w.type.pinned) {
+            clamp_target_to_screen(w);
+        }
+        let pos_dt = sub(w.target, w.pos);
+        let target_dir = normalize_or_zero(pos_dt);
+        let target_l = length(pos_dt);
+        if (length_squared(w.velocity) < MAX_SPEED * MAX_SPEED)
+            w.velocity = add(w.velocity, mul(target_dir, target_l * ACCELERATION * dt));
+    } else {
+        if (w.type.magnet == null) {w.velocity = sub(w.velocity, mul(w.velocity, dt * 2.0))};
+        let x_max = is_bound_x_max(w.pos.x);
+        let x_min = is_bound_x_min(w.pos.x);
+        let y_max = is_bound_y_max(w.pos.y);
+        let y_min = is_bound_y_min(w.pos.y);
+
+    
+        if (x_min) w.type.magnet = magnet_left(w.type.magnet);
+        if (y_min) w.type.magnet = magnet_top(w.type.magnet);
+        if (x_max) w.type.magnet = magnet_right(w.type.magnet);
+        if (y_max) w.type.magnet = magnet_bottom(w.type.magnet);
+        if (w.type.magnet) {
+            w.velocity.x = w.velocity.x - (w.velocity.x * dt * (w.type.magnet.x == 0 ? 3.0 : 15.0))
+            w.velocity.y = w.velocity.y - (w.velocity.y * dt * (w.type.magnet.y == 0 ? 3.0 : 15.0))
+
+            if (w.type.magnet.x == -1) {
+                w.target.x = min_x;
+                let x_dt = w.pos.x - w.target.x;
+                w.velocity.x = w.velocity.x - ( x_dt * dt * ARCHIMEDES_FORCE);
+            }
+            if (w.type.magnet.x == 1) {
+                w.target.x = max_x;
+                let x_dt = w.pos.x - w.target.x;
+                w.velocity.x = w.velocity.x - ( x_dt * dt * ARCHIMEDES_FORCE);
+            }
+            if (w.type.magnet.y == -1) {
+                w.target.y = min_y;
+                let y_dt = w.pos.y - w.target.y;
+                w.velocity.y = w.velocity.y - ( y_dt * dt * ARCHIMEDES_FORCE);
+            }
+            if (w.type.magnet.y == 1) {
+                w.target.y = max_y;
+                let y_dt = w.pos.y - w.target.y;
+                w.velocity.y = w.velocity.y - ( y_dt * dt * ARCHIMEDES_FORCE);
+            }
+        }
+        
+    }
+    if (length_squared(w.velocity) < 0.001) {
+        w.velocity = vec2(0, 0);
+    }
+    w.pos = add(w.pos, mul(w.velocity, dt));
+    
+}
+
+function update_fixed(w: FloatingWindow, dt: number, now: number, getElementPos: (id: string) => Vec2) {
+    if (w.type.mode != "fixed") return;
+    const elementPos = getElementPos(w.type.targetId);
+    w.target = add(elementPos, w.type.offset);
+    clamp_target_to_screen(w);
+    apply_squishy_movement(w, dt);
+}
+
+const FOLLOWING_OFFSET : number = 32;
+function update_following(w: FloatingWindow, dt: number, now: number, mouse_pos: Vec2) {
+    w.target = sub(mouse_pos, half_screen);
+    let half_size = mul(w.size, 0.5);
+    if (w.target.x + w.size.x + FOLLOWING_OFFSET + SCREEN_MARGIN < half_screen.x) {
+        w.target.x = w.target.x + half_size.x + FOLLOWING_OFFSET;
+    } else if (w.target.x - w.size.x - FOLLOWING_OFFSET - SCREEN_MARGIN > -half_screen.x) {
+        w.target.x = w.target.x - half_size.x - FOLLOWING_OFFSET;
+    }
+    w.target.y = clamp(w.target.y, - half_screen.y + half_size.y + FOLLOWING_OFFSET , half_screen.y - half_size.y - FOLLOWING_OFFSET);
+    apply_squishy_movement(w, dt, ACCELERATION * 5, 100.0);
+}
+
+
+
 async function tick_windows() {
     let dt = wrapped_dt();
 
     let now = Date.now();
     let is_resizing = now - latest_resize < LATEST_RESIZE_DT;
-
+    let mouse_pos = get(MOUSE_POS);
     WINDOWS.update((windows) => {
         for (var [id, w] of Object.entries(windows)) {
-            if (w.type.mode != "floating") continue;
             let is_sleeping = now - w.inactive_since > SLEEP_DT;
-            if (is_sleeping && !is_resizing) { 
-                continue;
-            }
-
-            let half_size = mul(w.size, 0.5);
-
-            const min_x = half_size.x + SCREEN_MARGIN - half_screen.x;
-            const min_y = half_size.y + SCREEN_MARGIN - half_screen.y;
-            const max_x = half_screen.x - half_size.x - SCREEN_MARGIN;
-            const max_y = half_screen.y - half_size.y - SCREEN_MARGIN;
-
-            let is_bound_x_min = (v: number) : boolean => v < min_x;
-            let is_bound_x_max = (v: number) : boolean => v > max_x;
-            let is_bound_y_min = (v: number) : boolean => v < min_y;
-            let is_bound_y_max = (v: number) : boolean => v > max_y;
-
-            if (w.type.grabbed != null || w.type.pinned) {
-                w.velocity = sub(w.velocity, mul(w.velocity, dt * 15.0));
-                if (w.type.pinned) {
-                    if (is_bound_x_min(w.pos.x)) w.target.x = min_x;
-                    if (is_bound_x_max(w.pos.x)) w.target.x = max_x;
-                    if (is_bound_y_min(w.pos.y)) w.target.y = min_y;
-                    if (is_bound_y_max(w.pos.y)) w.target.y = max_y;
-                }
-                let pos_dt = sub(w.target, w.pos);
-                let target_dir = normalize_or_zero(pos_dt);
-                let target_l = length(pos_dt);
-                if (length_squared(w.velocity) < MAX_SPEED * MAX_SPEED)
-                    w.velocity = add(w.velocity, mul(target_dir, target_l * ACCELERATION * dt));
-            } else {
-                if (w.type.magnet == null) {w.velocity = sub(w.velocity, mul(w.velocity, dt * 2.0))};
-                let x_max = is_bound_x_max(w.pos.x);
-                let x_min = is_bound_x_min(w.pos.x);
-                let y_max = is_bound_y_max(w.pos.y);
-                let y_min = is_bound_y_min(w.pos.y);
             
-                if (x_min) w.type.magnet = magnet_left(w.type.magnet);
-                if (y_min) w.type.magnet = magnet_top(w.type.magnet);
-                if (x_max) w.type.magnet = magnet_right(w.type.magnet);
-                if (y_max) w.type.magnet = magnet_bottom(w.type.magnet);
-                if (w.type.magnet) {
-                    w.velocity.x = w.velocity.x - (w.velocity.x * dt * (w.type.magnet.x == 0 ? 3.0 : 15.0))
-                    w.velocity.y = w.velocity.y - (w.velocity.y * dt * (w.type.magnet.y == 0 ? 3.0 : 15.0))
-
-                    if (w.type.magnet.x == -1) {
-                        w.target.x = min_x;
-                        let x_dt = w.pos.x - w.target.x;
-                        w.velocity.x = w.velocity.x - ( x_dt * dt * ARCHIMEDES_FORCE);
+            switch (w.type.mode) {
+                case "floating":
+                    if (is_sleeping && !is_resizing) { 
+                        continue;
                     }
-                    if (w.type.magnet.x == 1) {
-                        w.target.x = max_x;
-                        let x_dt = w.pos.x - w.target.x;
-                        w.velocity.x = w.velocity.x - ( x_dt * dt * ARCHIMEDES_FORCE);
+                    update_floating(w, dt, now);
+                    if (!is_zero(w.velocity) || w.type.grabbed != null) {
+                        w.inactive_since = now;
                     }
-                    if (w.type.magnet.y == -1) {
-                        w.target.y = min_y;
-                        let y_dt = w.pos.y - w.target.y;
-                        w.velocity.y = w.velocity.y - ( y_dt * dt * ARCHIMEDES_FORCE);
+                    if (is_sleeping) {
+                        w.type.magnet = null
                     }
-                    if (w.type.magnet.y == 1) {
-                        w.target.y = max_y;
-                        let y_dt = w.pos.y - w.target.y;
-                        w.velocity.y = w.velocity.y - ( y_dt * dt * ARCHIMEDES_FORCE);
-                    }
-                }
-                
+                    break;
+                case "follow":
+                    update_following(w, dt, now, mouse_pos);
+                    break;
             }
-            if (length_squared(w.velocity) < 0.001) {
-                w.velocity = vec2(0, 0);
-            }
-            w.pos = add(w.pos, mul(w.velocity, dt));
-            if (!is_zero(w.velocity) || w.type.grabbed != null) {
-                w.inactive_since = now;
-            }
-            if (is_sleeping) {
-                w.type.magnet = null
-            }
+            
+            
+            
+            // update_fixed(w, dt, now, getElementPos);
+            // update_following(w, dt, now, mousePos);
         }
         return windows
     })
@@ -383,18 +450,12 @@ function resizeEnd(w: FloatingWindow) {
 
 
 export function openFloating(entry: FloatingWindow) {
-    // WINDOWS.update((windows) => {
-    //     windows[entry.id] = entry;
-    //     return windows;
-    // });
-    // WINDOWS[entry.id] = entry;
-    
-    
     WINDOWS.update((windows) => {
         if (windows[entry.id]) {
             shakeById(FLOATING_PREFIX + entry.id)
         } else {
-            entry.z_index = Object.keys(windows).length;
+            let z = entry.type.mode == "floating" ? Object.keys(windows).length : 1000;
+            entry.z_index = z;
             windows[entry.id] = entry;
         }
         return windows;
@@ -407,6 +468,13 @@ export function closeFloating(id: string){
     WINDOWS.update((windows) => {
         delete windows.id;
         delete windows[id];
+        return windows;
+    });
+}
+
+export function set_window_size(id: string, size: Vec2) {
+    WINDOWS.update((windows) => {
+        if (windows[id]) windows[id].size = size;
         return windows;
     });
 }

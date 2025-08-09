@@ -20,7 +20,6 @@
     `;
     THEME.subscribe(t => {
         color = [t.primary.value.r / 255.,  t.primary.value.g / 255.,  t.primary.value.b / 255.,  t.primary.value.a / 255.];
-        console.log(color)
     })
 
 	var color : [number, number, number, number] = $state([1., 1., 1., 1.]);

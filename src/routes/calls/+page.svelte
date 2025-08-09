@@ -4,6 +4,7 @@
     import { get, type Writable } from "svelte/store";
     import { Svroller } from "svrollbar";
   import Channel from "../../components/calls/channel.svelte";
+  import CallMembers from "../../components/calls/call_members.svelte";
 
     type Resizer = {
         max: number,
@@ -37,7 +38,6 @@
             if (current < resizer.min * 0.5) {
                 target = 0;
             }
-            console.log(target, resizer.min * 0.5)
             val.set(target);
 		}
 		function stop() {
@@ -67,12 +67,13 @@
         onmousedown={(e) => {handleMouseDown(e, calls_resizer, calls_val)}}></div>
     </div>
     <div class="flex-grow h-full card-100 card-base card-100-border flex">
-        <div class="flex-grow h-full"></div>
+        <div class="flex-grow h-full">
+            <CallMembers></CallMembers>
+        </div>
         <div class="relative h-full w-1">
             <div class="z-10 absolute hover:bg-[#FFF2] h-full resizer w-[12px]" 
             onmousedown={(e) => {handleMouseDown(e, chat_resizer, chat_val, true)}}></div>
         </div>
         <div class="w-[128px] h-full border-l-2 border-[#8881]" style="flex-basis:{$chat_val}px"></div>
     </div>
-    
 </div>

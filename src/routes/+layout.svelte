@@ -8,17 +8,18 @@
 	
 	let { children } = $props();
 
-	import { onNavigate } from '$app/navigation';
-	onNavigate((navigation) => {
-		if (!document.startViewTransition) return;
-		if (location.pathname === navigation.from?.url?.pathname) return;
-		return new Promise((resolve) => {
-			document.startViewTransition(async () => {
-				resolve();
-				// await navigation.complete;
-			});
-		});
-	});
+	// bye bye 😢
+	// import { onNavigate } from '$app/navigation';
+	// onNavigate((navigation) => {
+	// 	if (!document.startViewTransition) return;
+	// 	if (location.pathname === navigation.from?.url?.pathname) return;
+	// 	return new Promise((resolve) => {
+	// 		document.startViewTransition(async () => {
+	// 			resolve();
+	// 			// await navigation.complete;
+	// 		});
+	// 	});
+	// });
 	import ResizableNavbar from "../components/navbar/resizable_navbar.svelte";
 	import BackgroundShaderNoise from "../components/bg/noise.svelte";
 	import DesktopTitlebar from "../components/platform/desktop/titlebar.svelte";

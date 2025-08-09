@@ -16,12 +16,12 @@
     import { logout } from "$lib/api/auth.svelte";
     import Miniprofile from "../../components/user/miniprofile.svelte";
     import MiniprofileEditor from "../../components/window/miniprofile_editor.svelte";
-    import { USER_UID } from "$lib/token.svelte";
+    import { USER_GUID } from "$lib/token.svelte";
     import Separator from "../../components/content/separator.svelte";
     import Popup from "../../components/popup.svelte";
     import { type MiniprofileTheme } from "$lib/theme/miniprofile.svelte";
     import { newToast } from "$lib/toast.svelte";
-    import { media_limit, MEDIA_RULE } from "$lib/consts.svelte";
+    import { media_limit, MEDIA_RULE } from "$lib/globals.svelte";
     
     
     let themes : Writable<Record<string, string>> = localState("saved_themes", {});
@@ -68,8 +68,9 @@
         openFloating({
             ...DefaultWindow,
             component: AppThemeEditor,
-            min_size: vec2(265, 400),
-            size: vec2(265, 400),
+            min_size: vec2(265, 300),
+            size: vec2(600, 600),
+            max_size: vec2(600, 900),
             id: "theme_editor",
             props: {
                 id: "theme_editor",
@@ -85,9 +86,9 @@
         openFloating({
             ...DefaultWindow,
             component: MiniprofileEditor,
+            size: vec2(265, 700),
             min_size: vec2(265, 300),
-            size: vec2(265, 300),
-            max: vec2(300, 600),
+            max_size: vec2(300, 800),
             id: "miniprofile_editor",
             props: {
                 id: "miniprofile_editor",
@@ -121,9 +122,6 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
 
 <div class="w-full flex justify-center relative">
     <div class="w-full flex flex-col h-fit max-w-[900px] p-2 card-base card-100 card-100-border gap-2">
-        
-
-
         <CollapseSetting icon="mingcute:paint-brush-ai-line" open>
             <!-- TODO: ACTIVE STYLE -->
             <div slot="title">Theme</div>
@@ -185,13 +183,13 @@ class="flex-grow flex justify-center relative vh min-w-[900px] p-2"
 
             </div>
         </CollapseSetting>
-        {#if $USER_UID != null}
+        {#if $USER_GUID != null}
         <CollapseSetting icon="mingcute:user-3-line" open>
             <div slot="title">Account</div>
             <div slot="content" class="flex flex-col gap-4">
                 {#key profile_editor}
                     <Miniprofile 
-                        user_id={$USER_UID} 
+                        user_id={$USER_GUID} 
                         id={MINIPROFILE_PREVIEW}
                         start_edit={start_edit_miniprofile}
                     />

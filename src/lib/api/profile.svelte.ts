@@ -5,7 +5,7 @@
 
 // #[derive(Deserialize, Serialize, Clone)]
 // pub struct Profile {
-//     pub uid: String,
+//     pub guid: String,
 //     pub nickname: String,
 //     pub encoded_theme: Option<String>,
 //     pub background: Option<String>,
@@ -14,13 +14,13 @@
 // }
 
 import { PUBLIC_API_BASE } from "$env/static/public";
-import { media_limit, MEDIA_RULE } from "$lib/consts.svelte";
+import { media_limit, MEDIA_RULE } from "$lib/globals.svelte";
 import { ACCESS_TOKEN } from "$lib/token.svelte";
 import { get } from "svelte/store";
 
 // #[derive(Deserialize, Serialize, Clone)]
 // pub struct MiniProfile {
-//     pub uid: String,
+//     pub guid: String,
 //     pub nickname: String,
 //     pub encoded_theme: Option<String>,
 //     pub background: Option<String>,
@@ -29,15 +29,16 @@ import { get } from "svelte/store";
 // }
 
 export type Profile = {
-    uid: string,
+    guid: string,
     nickname: string,
     encoded_theme: string | null,
     background: string | null,
     status: string | null,
     avatar: string | null
 }
+
 export type MiniProfile = {
-    uid: string,
+    guid: string,
     nickname: string,
     encoded_theme: string | null,
     background: string | null,
@@ -126,7 +127,7 @@ export async function wrapped_send_media(file: File, endpoint: string, url_endpo
 
     switch (get(MEDIA_RULE)) {
         case "none":
-            if (file.size * 1024  * 1024 > media_limit) {
+            if (file.size > media_limit * 1024 * 1024) {
                 return "File too large";
             }
             const formData = new FormData();

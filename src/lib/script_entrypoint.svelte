@@ -8,6 +8,8 @@ import { afterNavigate } from "$app/navigation";
 import { page } from "$app/state";
 import { latest_page, page_not_found } from "./path_watcher.svelte";
 import { get } from "svelte/store";
+  import { MOUSE_POS, TITLEBAR_SIZE } from "./globals.svelte";
+  import { vec2 } from "./window/floating.svelte";
 
 // import { TURNSTILE_SITE_KEY } from "$env/static/public";
 onMount(() => {
@@ -24,6 +26,13 @@ afterNavigate(({ to }) => {
         latest_page.set(page.url.pathname);
     }
 });
+
+
+document.documentElement.addEventListener("mousemove", (e : MouseEvent) => {
+    MOUSE_POS.set(vec2(e.clientX, e.clientY - TITLEBAR_SIZE));
+});
+
+
 
 
 // window.onloadTurnstileCallback = function () {

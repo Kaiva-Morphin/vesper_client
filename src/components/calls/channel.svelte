@@ -2,7 +2,7 @@
   import { fly, slide } from 'svelte/transition';
   import Icon from '@iconify/svelte';
   import Avatar from '../user/avatar.svelte';
-  import { USER_UID } from '$lib/token.svelte';
+  import { USER_GUID } from '$lib/token.svelte';
   import { get_miniprofile, type MiniProfile } from '$lib/api/profile.svelte';
 
   let {
@@ -10,7 +10,7 @@
     channel_id = '1',
     title = 'Channel aaaaaaaaaaaaaa',
     members = [
-      { id: USER_UID, name: 'Avatar 1' },
+      { id: USER_GUID, name: 'Avatar 1' },
       { id: '2', name: 'Avatar 2' },
       { id: '3', name: 'Avatar 3' },
       { id: '4', name: 'Avatar 4' },
@@ -84,23 +84,25 @@
       {/if}
       <div class="flex-grow-[1000] text-ellipsis overflow-hidden font-bold">{title}</div>
       <div class="flex-grow-[1] flex-shrink h-full flex flex-row flex-wrap-reverse gap-y-4 p-0.5 gap-0.5 place-content-end oveflow-hidden">
+        {#each members as member (member.id)}
         {#if !opened}
-          {#each members as member (member.id)}
-            <div transition:fly_y|global>
+            <div transition:fly_y|local>
               <Avatar class="w-8 h-8 hover:scale-105 transition-transform" mini url={{nickname: member.name}} ></Avatar>
             </div>
+            {/if}
           {/each}
-        {/if}
       </div>
   </div>
   {#if opened}
-    <div transition:slide={{ duration: 200 }} class="flex flex-col px-2 pb-2 gap-1 mt-1">
+    <div transition:slide class="flex flex-col px-2 pb-2 gap-1">
         {#each members as member (member.id)}
           <div transition:slide class="member">
+          {#if opened}
             <div transition:fly_x|global class="flex flex-row gap-1 items-center font-semibold">
               <Avatar class="w-8 h-8 hover:scale-105 transition-transform" mini url={{nickname: member.name}} ></Avatar>
               <div>{member.name}</div>
             </div>
+            {/if}
           </div>
         {/each}
     </div>

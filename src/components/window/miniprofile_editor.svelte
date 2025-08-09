@@ -6,7 +6,7 @@
     import { easeOutQuint, sleep } from "$lib/util.svelte";
     import { closeFloating } from "$lib/window/floating.svelte";
     import { fade, fly, scale } from "svelte/transition";
-    import { applyMiniprofileTheme, DEFAULT_MINIPROFILE_THEME, miniprofileThemeTypes, serializeMiniprofileTheme, type MiniprofileTheme } from "$lib/theme/miniprofile.svelte";
+    import { applyMiniprofileTheme, DEFAULT_MINIPROFILE_THEME, miniprofileThemeToStyle, miniprofileThemeTypes, serializeMiniprofileTheme, type MiniprofileTheme } from "$lib/theme/miniprofile.svelte";
     import { get, writable, type Writable } from "svelte/store";
     import { CssStyleProperty } from "$lib/theme/abstraction.svelte";
     import LabelSeparator from "../content/label_separator.svelte";
@@ -15,6 +15,8 @@
     import { newToast } from "$lib/toast.svelte";
     import BorderInput from "../content/border_input.svelte";
     import { Svrollbar } from "svrollbar";
+  import { refresh_user_miniprofile_cache } from "$lib/globals.svelte";
+  import { USER_GUID } from "$lib/token.svelte";
 
     let {
         id,
@@ -34,9 +36,12 @@
 
     let EDITABLE_MINIPROFILE : Writable<MiniprofileTheme> = writable(theme);
 
+    let style = "";
     EDITABLE_MINIPROFILE.subscribe(theme => {
         let em = document.getElementById(em_id);
-        if (em) applyMiniprofileTheme(theme, em);
+        style = miniprofileThemeToStyle(theme);
+        // if (em) applyMiniprofileTheme(theme, em);
+        if (em) document.getElementById(em_id)?.setAttribute("style", style);
     });
     let viewport;
     let contents;
@@ -53,8 +58,10 @@
             avatar_loading = true;            
             let e = await set_avatar(file);
             if (!e) {
-                await sleep(100);
-                refresh_preview();
+                // await sleep(100);
+                // refresh_preview();
+                let guid = get(USER_GUID);
+                if (guid) refresh_user_miniprofile_cache(guid)
                 newToast("Avatar saved!", "btn-success");
             } else {
                 newToast(e.toString(), "btn-error");
@@ -70,8 +77,10 @@
             background_loading = true;
             let e = await set_miniprofile_bg(file);
             if (!e) {
-                await sleep(100);
-                refresh_preview();
+                // await sleep(100);
+                // refresh_preview();
+                let guid = get(USER_GUID);
+                if (guid) refresh_user_miniprofile_cache(guid)
                 newToast("Background saved!", "btn-success");
             } else {
                 newToast(e.toString(), "btn-error");
@@ -166,8 +175,15 @@ in:scale={{duration: 300, easing: easeOutQuint, start: 0.5}}
                     <input type="range" min={$EDITABLE_MINIPROFILE[t].min as number} max={$EDITABLE_MINIPROFILE[t].max as number} class="min-h-[24px] range w-full" bind:value={$EDITABLE_MINIPROFILE[t].value} />
                 {/each}
                 <Button class="btn btn-border btn-primary" icon="mingcute:save-2-line" request onclick={async () => {
-                    let ok = await set_miniprofile_theme(serializeMiniprofileTheme(get(EDITABLE_MINIPROFILE)));
+                    let deserialized = get(EDITABLE_MINIPROFILE);
+                    let serialized = serializeMiniprofileTheme(deserialized)
+                    let current = style;
+                    let ok = await set_miniprofile_theme(serialized);
                     newToast(ok ? "Saved!" : "Something went wrong", ok ? "btn-success" : "btn-error");
+                    let guid = get(USER_GUID);
+                    if (ok && guid) {
+                        refresh_user_miniprofile_cache(guid)
+                    }
                 }}>Save</Button>
             </div>
         </div>

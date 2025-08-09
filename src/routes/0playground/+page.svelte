@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Svrollbar } from 'svrollbar'
+  import { Svrollbar ,Svroller } from 'svrollbar'
 
   const items = Array.from({ length: 50 }).map((_, i) => `item ${i}`)
 
@@ -22,12 +22,13 @@
   .wrapper {
     position: relative;
     width: 10rem;
+    height: 90vh;
   }
 
   .viewport {
     position: relative;
     width: 10rem;
-    height: 10rem;
+    height: 90vh;
     overflow: scroll;
     border: 1px solid gray;
     box-sizing: border-box;

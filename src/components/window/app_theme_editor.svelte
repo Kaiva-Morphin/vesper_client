@@ -6,10 +6,11 @@
     import { easeOutQuint } from "$lib/util.svelte";
     import { closeFloating } from "$lib/window/floating.svelte";
     import { fade, fly, scale } from "svelte/transition";
+  import { Svrollbar } from "svrollbar";
     
     let {id} : {id : string} = $props()
-    let viewport
-    let contents
+    let viewport: HTMLElement | null = $state(null);
+    let contents: HTMLElement | null = $state(null);
 </script>
 
 
@@ -32,12 +33,14 @@ in:scale={{duration: 300, easing: easeOutQuint, start: 0.5}}
         <button class="pr-2 cursor-pointer"><Icon icon="mingcute:close-fill" class="hover:text-gray-500" onclick={() => closeFloating(id)}/></button>
         <div class="w-full absolute bottom-0 horizontal_separator "></div>
     </div>
-    <div class="w-full flex-grow cursor-auto">
+    <div class="flex-grow cursor-auto relative">
         <div bind:this={viewport} class="viewport w-full h-full overflow-y-scroll">
             <!-- dont ask, idk -->
             <div bind:this={contents} class="grid h-[1px] gap-2 p-2
+            
                     no-alpha  dark-picker
                     "
+                    style="max-width: 620px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));"
                     >
                 {#each appThemeTypes.fake_rgba as t}
                     <ColorPicker
@@ -65,7 +68,6 @@ in:scale={{duration: 300, easing: easeOutQuint, start: 0.5}}
                 {/each}
             </div>
         </div>
-        <!-- <Svrollbar {viewport} {contents} /> -->
+        <Svrollbar {viewport} {contents} />
     </div>
-    
 </div>

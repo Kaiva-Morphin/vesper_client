@@ -32,17 +32,17 @@ export function determineRegisterError(error: string) :
         if (e.includes("email code")) {return 'INVALID_EMAIL_CODE'}
         if (e.includes("email")) {return 'INVALID_EMAIL'}
         if (e.includes("password")) {return 'INVALID_PASSWORD'}
-        if (e.includes("uid")) {return 'INVALID_USERNAME'}
+        if (e.includes("guid")) {return 'INVALID_USERNAME'}
         if (e.includes("nickname")) {return 'INVALID_USERNAME'}
     } else {
         if (e.includes("tos")) {return 'TOS'}
-        if (e.includes("uid")) {return 'USERNAME_EXISTS'}
+        if (e.includes("guid")) {return 'USERNAME_EXISTS'}
         if (e.includes("email")) {return 'EMAIL_EXISTS'}
     }
     return error
 }
 
-export async function register(turnstile: string, uid: string, password: string, nickname: string, email: string, email_code: string, ) : Promise<{access_token: string, exp: number} | string> {
+export async function register(turnstile: string, guid: string, password: string, nickname: string, email: string, email_code: string, ) : Promise<{access_token: string, exp: number} | string> {
     try {
         const res = await fetch(`${PUBLIC_API_BASE}/api/auth/account`, {
             headers: {
@@ -50,7 +50,7 @@ export async function register(turnstile: string, uid: string, password: string,
             },
             method: "POST",
             body: JSON.stringify({
-                "uid": uid,
+                "guid": guid,
                 "nickname": nickname,
                 "password": password,
                 "fingerprint": DEVICE_FINGERPRINT, // TODO!
@@ -69,7 +69,7 @@ export async function register(turnstile: string, uid: string, password: string,
     }
 }
 
-export async function oauth_register(turnstile: string, temp_token: string, uid: string, password: string ) : Promise<{access_token: string, exp: number} | string> {
+export async function oauth_register(turnstile: string, temp_token: string, guid: string, password: string ) : Promise<{access_token: string, exp: number} | string> {
     try {
         const res = await fetch(`${PUBLIC_API_BASE}/api/auth/oauth/account`, {
             headers: {
@@ -77,7 +77,7 @@ export async function oauth_register(turnstile: string, temp_token: string, uid:
             },
             method: "POST",
             body: JSON.stringify({
-                "uid": uid,
+                "guid": guid,
                 "password": password,
                 "fingerprint": DEVICE_FINGERPRINT, // TODO!
                 "tos_accepted": true,
@@ -158,9 +158,9 @@ export async function oauth_login(token: string ) : Promise<{access_token: strin
 }
 
 
-export async function checkUid(uid: string): Promise<boolean | null> {
+export async function checkUid(guid: string): Promise<boolean | null> {
     try {
-        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/account/uid_check?user_uid=${uid.toLocaleLowerCase()}`);
+        const res = await fetch(`${PUBLIC_API_BASE}/api/auth/account/guid_check?user_guid=${guid.toLocaleLowerCase()}`);
         if (!res.ok) return null;
         let j = await res.json();
         return j;

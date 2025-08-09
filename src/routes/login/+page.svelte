@@ -40,7 +40,6 @@
   async function oauthHandler(event: MessageEvent<any>) {
     if (event.origin !== window.location.origin) return;
     let err = event.data?.err;
-    console.log(event.data);
     if (err) {
       newToast(err, 'btn-error');
       return
